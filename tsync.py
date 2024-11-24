@@ -66,10 +66,16 @@ def reset_pass():
     ohash = bcrypt.hashpw(op.encode("utf-8"), salt)
     nhash = bcrypt.hashpw(np.encode("utf-8"), salt)
     res = db.cursor().execute(
+        "SELECT passhash FROM user WHERE id=? AND passhash=?", (id, ohash))
+    res = res.fetchone()
+    if res is None:
+        return redirect("/account?passfail=true")
+
+    res = db.cursor().execute(
         "UPDATE user SET passhash=? WHERE id=? AND passhash=?", (nhash, id, ohash))
     res = db.commit()
     print(res)
-    return redirect("/account?passfail=true")
+    return redirect("/account")
 
 
 @app.get("/login")
@@ -193,6 +199,7 @@ def save_top_question(user_id, tid, tq: [test_parser.TopQuestion]):
 def upload_file():
     f = request.files['file']
     content = f.read()
+    content = content.decode('utf-8').replace('\r\n', '\n')
     etest = test_parser.parse_test(content)
     mktest = 'admin' in session and session['admin']
     id = get_test_by_path(etest.ttype, etest.name, mktest)
@@ -212,4 +219,4 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

@@ -44,7 +44,7 @@
                     <div class="answer">{{ q.a | safe }}</div>
                     {% for key in q.others %}
                     <div class="other">
-                        <span style="color: {{ 'green' if key == q.a else 'red' }};">{{ key }}: </span>
+                        <span style="color: {{ 'green' if key == q.a else 'red' }};">{{ key | safe }}: </span>
                         <span>{{ q.others[key] }}</span>
                     </div>
                     {% endfor %}

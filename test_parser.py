@@ -66,6 +66,7 @@ def parse_afi(phtml) -> ETest:
         q = quest.get_text()
         sanetize(quest)
         q_html = quest.decode_contents()
+        answ = ""
         if 'numerical' in child['class']:
             answ = content.find('div', attrs={'class': 'ablock'}).find('input')
             answ = answ.get('value')
@@ -130,7 +131,6 @@ def sanetize(a):
 def parse_test(content: str) -> ETest:
     parsed_html = BeautifulSoup(content, 'html.parser')
     names = path(parsed_html)
-    print(names)
     if names[0] == '\n(UE) Diskrete Strukturen\n':
         etest = parse_ds(parsed_html)
     if names[0] == '\n(VO) Analysis für Informatik\n':
