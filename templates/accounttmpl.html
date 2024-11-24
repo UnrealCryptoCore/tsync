@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}Account{% endblock %}
+{% block content %}
+<script>
+    function logout() {
+        window.location.href = "/logout";
+    }
+</script>
+
+
+<h1>Account</h1>
+<div>
+    <span>Name: </span><span>{{ username }}</span>
+    <br>
+    <span>UserId: </span><span>{{ id }}</span>
+</div>
+<form action="/resetpass" method="post">
+    {% if passfail %}
+    <div>
+        Wrong password or passwords do not match.
+    </div>
+    {% endif %}
+    <h2>Reset password</h2>
+    <label>old password</label>
+    <input type="password" name="opass">
+    <br>
+    <br>
+    <label>new password</label>
+    <input type="password" name="npass">
+    <br>
+    <br>
+    <label>retype password</label>
+    <input type="password" name="rpass">
+    <br>
+    <br>
+    <input type="submit" value="reset">
+</form>
+<br>
+<br>
+<br>
+<button onclick="logout()">Logout</button>
+{% endblock %}

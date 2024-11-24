@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Index{% endblock %}
+{% block content %}
+<div>
+    <div>
+        <label>Upload Test</label>
+        <form method="post" enctype="multipart/form-data" action="/upload">
+            <input type="file" name="file" />
+            <input type="submit" value="Upload" />
+        </form>
+    </div>
+</div>
+<div id="history">
+    {% for i in items %}
+    <p></p>
+    {% endfor %}
+</div>
+{% endblock %}

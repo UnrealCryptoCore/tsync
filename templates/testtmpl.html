@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}Test{% endblock%}
+{% block head %}
+{{ super() }}
+<style>
+    .top-question {
+        border-style: solid;
+        margin: 1rem;
+    }
+
+    .question {
+        border-style: solid;
+        margin: 1.2rem;
+        align-content: space-between;
+        padding-bottom: 1rem;
+        padding-left: 0.3rem;
+
+        >.q-input {
+            margin-block: auto;
+            right: 0;
+        }
+    }
+    .answer {
+        border-style: solid;
+        max-width: fit-content;
+        padding: 0.2rem;
+        border-width: 1px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>{{ test.ttype + " - " + test.name }}</h2>
+<div class="questions">
+    {% for tq in test.q %}
+    <div class="top-question">
+        <p>{{ tq.html_h|safe }}</p>
+        <div>
+            {% for q in tq.q %}
+            <div class="question">
+                <span>{{ q.html_q|safe }}</span>
+                <span class="q-input">
+                    <div class="answer">{{ q.a | safe }}</div>
+                    {% for key in q.others %}
+                    <div class="other">
+                        <span style="color: {{ 'green' if key == q.a else 'red' }};">{{ key }}: </span>
+                        <span>{{ q.others[key] }}</span>
+                    </div>
+                    {% endfor %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

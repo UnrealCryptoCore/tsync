@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+
+<head>
+    {% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <title>{% block title %}{% endblock %} - T-Sync</title>
+    {% endblock %}
+</head>
+
+<body style="margin: 0; padding: 0;">
+    <div id="header" style="background-color: lightgray; width: 100%;">
+        <div style=" display: flex; justify-content: space-between; height: 3rem; margin-bottom: 1rem; padding: 1rem;">
+            <div>
+                <h1 style="margin: auto; margin-left: 1rem;">T-Sync</h1>
+            </div>
+            <div>
+                <a href="/account">Account</a>
+                <a href="/logout">logout</a>
+            </div>
+        </div>
+    </div>
+    <div id="content" style="padding: 1rem;">{% block content %}{% endblock %}</div>
+    <div id="footer">
+        {% block footer %}
+
+        {% endblock %}
+    </div>
+</body>
+
+</html>
