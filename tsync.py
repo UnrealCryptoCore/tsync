@@ -220,7 +220,7 @@ def index():
 
 
 if __name__ == "__main__":
-    if len(sys) == 2 and sys.argv[1] == 'release':
+    if len(sys.argv) == 2 and sys.argv[1] == 'release':
         app.run(host='0.0.0.0', port=25566)
     else:
         app.run()
