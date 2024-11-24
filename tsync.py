@@ -200,7 +200,7 @@ def save_top_question(user_id, tid, tq: [test_parser.TopQuestion]):
 def upload_file():
     f = request.files['file']
     content = f.read()
-    content = content.decode('utf-8').replace('\r\n', '\n')
+    content = content.decode('utf-8').replace('\r\n', '\n').encode('utf-8')
     etest = test_parser.parse_test(content)
     mktest = 'admin' in session and session['admin']
     id = get_test_by_path(etest.ttype, etest.name, mktest)
