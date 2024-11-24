@@ -5,6 +5,7 @@ import bcrypt
 import os
 import uuid
 import test_parser
+import sys
 
 
 class User:
@@ -219,4 +220,7 @@ def index():
 
 
 if __name__ == "__main__":
-    app.run()
+    if len(sys) == 2 and sys.argv[1] == 'release':
+        app.run(host='0.0.0.0', port=25566)
+    else:
+        app.run()

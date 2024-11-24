@@ -37,7 +37,9 @@ def execute(cmd):
     cur = con.cursor()
 
     res = cur.execute(cmd)
-    return res.fetchall()
+    res = res.fetchall()
+    con.commit()
+    return res
 
 
 def setup_db():
