@@ -85,7 +85,7 @@ def parse_afi(phtml) -> ETest:
                         a = ans.find('div')
                         sanetize(a)
                         answ.append(a.decode_contents())
-                answ = str(set(answ))
+                answ = "; ".join(list(set(answ)))
 
         questions.append(
             Question(q, q_html, answ))

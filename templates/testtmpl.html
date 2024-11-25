@@ -39,7 +39,7 @@
         <div>
             {% for q in tq.q %}
             <div class="question">
-                <span>{{ q.html_q|safe }}</span>
+                <span>{{ q.html_q | safe }}</span>
                 <span class="q-input">
                     <div class="answer">{{ q.a | safe }}</div>
                     {% for key in q.others %}
