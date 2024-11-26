@@ -54,6 +54,24 @@ def path(phtml):
     return names
 
 
+def get_text(tag):
+    imgs = tag.findAll('img')
+    res = "\n".join([img['href'] for img in imgs])
+    return res + tag.get_text()
+
+
+def parse_ti(phtml) -> ETest:
+    questions = phtml.body.find('form', attrs={'id': 'responseform'}).findAll(
+        'div', attrs={'class': 'que'})
+    for question in questions:
+        content = question.find('div', attrs={'class': 'content'})
+        if 'multianswer' in content['class']:
+            answers = content.find('tbody').findAll(
+                'select', attrs={'selected': 'selected'})
+
+        print(content.get_text())
+
+
 def parse_afi(phtml) -> ETest:
     div = phtml.body.find('form', attrs={'id': 'responseform'}).find('div')
     children = div.findAll('div', attrs={'class': 'que'})
@@ -122,26 +140,34 @@ def parse_ds(phtml) -> ETest:
                     cq.a = ans
     return ETest('ds', '', tq)
 
+
 def sanetize(a):
     dupls = a.findAll('span', attrs={'class': 'MJX_Assistive_MathML'})
     for dupl in dupls:
         dupl.decompose()
 
 
+def make_compatible(content):
+    return content.decode('utf-8').replace('\r\n', '\n').replace('\n', '')
+
+
 def parse_test(content: str) -> ETest:
+    content = make_compatible(content)
     parsed_html = BeautifulSoup(content, 'html.parser')
     names = path(parsed_html)
-    if names[0] == '\n(UE) Diskrete Strukturen\n':
+    if names[0] == ' (UE) Diskrete Strukturen ':
         etest = parse_ds(parsed_html)
-    if names[0] == '\n(VO) Analysis für Informatik\n':
+    elif names[0] == ' (VO) Analysis für Informatik ':
         etest = parse_afi(parsed_html)
+    elif names[0] == ' (VU) Einführung in die Technische Informatik ':
+        etest = parse_ti(parsed_html)
     etest.name = names[-1]
     return etest
 
 
 if __name__ == "__main__":
-    html = open("data/bl05ds.html", "r").read()
-    etest = parse_test(html)
+    html = open("data/ti7.html", "r").read()
+    etest = parse_test(html.encode('utf-8'))
     print(etest.name)
     print(etest.ttype)
     print(etest.q[0].q[0])

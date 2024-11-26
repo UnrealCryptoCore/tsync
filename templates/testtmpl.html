@@ -3,33 +3,7 @@
 {% block title %}Test{% endblock%}
 {% block head %}
 {{ super() }}
-<style>
-    .top-question {
-        border-style: solid;
-        margin: 1rem;
-    }
-
-    .question {
-        border-style: solid;
-        margin: 1.2rem;
-        align-content: space-between;
-        padding-bottom: 1rem;
-        padding-left: 0.3rem;
-
-        >.q-input {
-            margin-block: auto;
-            right: 0;
-        }
-    }
-    .answer {
-        border-style: solid;
-        max-width: fit-content;
-        padding: 0.2rem;
-        border-width: 1px;
-    }
-</style>
 {% endblock %}
-
 {% block content %}
 <h2>{{ test.ttype + " - " + test.name }}</h2>
 <div class="questions">

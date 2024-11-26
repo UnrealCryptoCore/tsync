@@ -3,16 +3,31 @@
 {% block content %}
 <div>
     <div>
-        <label>Upload Test</label>
         <form method="post" enctype="multipart/form-data" action="/upload">
-            <input type="file" name="file" />
-            <input type="submit" value="Upload" />
+            <label>Test Upload</label>
+            <br>
+            <br>
+            <div id="drop_zone"
+                  ondrop="dropHandler(event);"
+                  ondragover="dragOverHandler(event);">
+                <p>Drag one or more files to this <i>drop zone</i>.</p>
+            </div>
+
+           <input type="file" name="file" accept=".html, .htm" />
+            <br>
+            <br>
+            <input class="upload-button" type="submit" value="Upload" />
         </form>
     </div>
 </div>
 <div id="history">
-    {% for i in items %}
-    <p></p>
+    <h3>History</h3>
+    <ul class="hist-list">
+    {% for l in hist %}
+    <li class="hist-item">
+    <a class="button-link" href="{{ '/test/'+l[0] }}" >{{ l[2] + ' - ' + l[1] }}</a>
+    </li>
     {% endfor %}
+    </ul>
 </div>
 {% endblock %}

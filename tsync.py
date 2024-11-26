@@ -125,16 +125,18 @@ def get_etest(id, user_id) -> test_parser.ETest:
     for tq in tqs:
         topq = test_parser.TopQuestion(tq[1], tq[2], [])
         res = db.cursor().execute(
-            "SELECT question, html_question, answer FROM question WHERE topid=? AND user_id=?", (tq[0], user_id))
+            "SELECT question, html_question, answer, question.id FROM question, answer WHERE answer.q_id=question.id AND topid=? AND answer.user_id=?", (tq[0], user_id))
         qs = res.fetchall()
         questions = []
         for q in qs:
             quest = test_parser.Question(q[0], q[1], q[2])
             questions.append(quest)
-            res = db.cursor().execute(
-                "SELECT question.answer, user.username FROM question, user WHERE question.topid=? AND question.question=? AND question.user_id!=? and user.id=question.user_id", (tq[0], q[0], user_id))
+            res = db.cursor().execute("SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[3]))
+            '''res = db.cursor().execute(
+                "SELECT question.answer, user.username FROM question, user WHERE question.topid=? AND question.question=? AND question.user_id!=? and user.id=question.user_id", (tq[0], q[0], user_id))'''
             others = res.fetchall()
             quest.others = {}
+            print(id, others)
             for other in others:
                 if other[0] in quest.others:
                     quest.others[other[0]].append(other[1])
@@ -175,6 +177,12 @@ def get_test_by_path(ttype, name, mktest):
     return test
 
 
+def clear_questions(user_id, tid):
+    db = get_db()
+    db.cursor().execute("DELETE FROM answer WHERE user_id=? AND tid=?", (user_id, tid))
+    db.commit()
+
+
 def save_top_question(user_id, tid, tq: [test_parser.TopQuestion]):
     db = get_db()
     res = db.cursor().execute(
@@ -187,20 +195,26 @@ def save_top_question(user_id, tid, tq: [test_parser.TopQuestion]):
     else:
         id = id[0]
     for q in tq.q:
+        res = db.cursor().execute(
+            "SELECT id FROM question WHERE topid=? AND question=?", (id, q.q))
+        res = res.fetchone()
+        if res is None:
+            qid = str(uuid.uuid4())
+            db.cursor().execute(
+                "INSERT INTO question (id, topid, user_id, question, html_question) VALUES (?, ?, ?, ?, ?)", (qid, id, user_id, q.q, q.html_q))
+        else:
+            qid = res[0]
+        aid = str(uuid.uuid4())
         db.cursor().execute(
-            "DELETE FROM question WHERE user_id=? AND topid=? AND question=?", (user_id, id, q.q))
-        qid = str(uuid.uuid4())
-        db.cursor().execute(
-            "INSERT INTO question (id, topid, user_id, question, html_question, answer) VALUES (?, ?, ?, ?, ?, ?)", (qid, id, user_id, q.q, q.html_q, q.a))
+            "INSERT INTO answer (id, tid, q_id, user_id, answer) VALUES (?, ?, ?, ?, ?)", (aid, tid, qid, user_id, q.a))
 
     db.commit()
 
 
-@app.route('/upload', methods=['POST'])
+@app.post('/upload')
 def upload_file():
     f = request.files['file']
     content = f.read()
-    content = content.decode('utf-8').replace('\r\n', '\n').encode('utf-8')
     etest = test_parser.parse_test(content)
     mktest = 'admin' in session and session['admin']
     id = get_test_by_path(etest.ttype, etest.name, mktest)
@@ -212,15 +226,23 @@ def upload_file():
     return redirect(f"/test/{id}")
 
 
+def get_history():
+    db = get_db()
+    res = db.cursor().execute("SELECT id, name, ttype FROM etest")
+    res = res.fetchall()
+    return res
+
+
 @app.route("/")
 def index():
     if "username" not in session:
         return redirect("/login")
-    return render_template("indextmpl.html", items=range(10))
+    hist = get_history()
+    return render_template("indextmpl.html", hist=hist, items=range(10))
 
 
 if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == 'release':
         app.run(host='0.0.0.0', port=25566)
     else:
-        app.run()
+        app.run(debug=True)
