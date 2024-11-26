@@ -7,13 +7,13 @@
             <label>Test Upload</label>
             <br>
             <br>
-            <div id="drop_zone"
+            <div id="drop-zone"
                   ondrop="dropHandler(event);"
                   ondragover="dragOverHandler(event);">
                 <p>Drag one or more files to this <i>drop zone</i>.</p>
             </div>
 
-           <input type="file" name="file" accept=".html, .htm" />
+           <input id="fileinp" type="file" name="file" accept=".html, .htm" />
             <br>
             <br>
             <input class="upload-button" type="submit" value="Upload" />
@@ -30,4 +30,6 @@
     {% endfor %}
     </ul>
 </div>
+
+<script src="/static/dad.js"></script>
 {% endblock %}
