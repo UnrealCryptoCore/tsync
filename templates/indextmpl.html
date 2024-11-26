@@ -3,6 +3,13 @@
 {% block content %}
 <div>
     <div>
+        {% if badfile %}
+        <div class="error">
+            <h4>Error</h4>
+            <p>Input file was invalid</p>
+        </div>
+        {% endif %}
+
         <form method="post" enctype="multipart/form-data" action="/upload">
             <label>Test Upload</label>
             <br>
@@ -17,7 +24,7 @@
             <br>
             <br>
             <input class="upload-button" type="submit" value="Upload" />
-        </form>
+       </form>
     </div>
 </div>
 <div id="history">

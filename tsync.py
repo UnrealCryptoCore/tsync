@@ -215,7 +215,10 @@ def save_top_question(user_id, tid, tq: [test_parser.TopQuestion]):
 def upload_file():
     f = request.files['file']
     content = f.read()
-    etest = test_parser.parse_test(content)
+    try:
+        etest = test_parser.parse_test(content)
+    except Exception:
+        return redirect("/?badfile=true"), 402
     mktest = 'admin' in session and session['admin']
     id = get_test_by_path(etest.ttype, etest.name, mktest)
     if id is None:
@@ -238,7 +241,8 @@ def index():
     if "username" not in session:
         return redirect("/login")
     hist = get_history()
-    return render_template("indextmpl.html", hist=hist, items=range(10))
+    badfile = request.args.get('badfile') in ['True', 'true']
+    return render_template("indextmpl.html", hist=hist, badfile=badfile)
 
 
 if __name__ == "__main__":
