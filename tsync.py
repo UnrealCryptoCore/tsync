@@ -217,8 +217,10 @@ def upload_file():
     content = f.read()
     try:
         etest = test_parser.parse_test(content)
-    except Exception:
-        return redirect("/?badfile=true"), 402
+    except Exception as e:
+        raise e
+        print('heere')
+        return redirect("/?badfile=true")
     mktest = 'admin' in session and session['admin']
     id = get_test_by_path(etest.ttype, etest.name, mktest)
     if id is None:

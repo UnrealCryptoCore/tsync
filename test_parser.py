@@ -63,13 +63,34 @@ def get_text(tag):
 def parse_ti(phtml) -> ETest:
     questions = phtml.body.find('form', attrs={'id': 'responseform'}).findAll(
         'div', attrs={'class': 'que'})
+    tq = []
     for question in questions:
         content = question.find('div', attrs={'class': 'content'})
-        if 'multianswer' in content['class']:
-            answers = content.find('tbody').findAll(
-                'select', attrs={'selected': 'selected'})
+        if 'multianswer' in question['class']:
+            tr = content.findAll('tr')
+            q = []
+            for r in tr[1:]:
+                answer = r.find(
+                    'option', attrs={'selected': 'selected'})
+                row = r.findAll('td')[:-1]
+                rowq = ",".join([s.get_text() for s in row])
+                rowq_html = " | ".join([s.decode_contents() for s in row])
+                q.append(Question(rowq, rowq_html, answer.get_text()))
+            for sel in content.findAll('select'):
+                sel.decompose()
 
-        print(content.get_text())
+            top_question = TopQuestion(content.get_text(), content.decode_contents(), q)
+            tq.append(top_question)
+        if 'calculated' in question['class']:
+            qtext = content.find('div', attrs={'class': 'qtext'})
+            ablock = content.find('div', attrs={'class': 'ablock'})
+            inp = ablock.find('input')
+            label = ablock.find('label')
+            q = [Question(label.get_text(), label.decode_contents(), inp.get('value'))]
+            top_question = TopQuestion(qtext.get_text(), qtext.decode_contents(), q)
+            tq.append(top_question)
+
+    return ETest('ti', '', tq)
 
 
 def parse_afi(phtml) -> ETest:
@@ -129,15 +150,23 @@ def parse_ds(phtml) -> ETest:
                 cq = Question(text, contents, None)
                 ctq.q.append(cq)
             elif 'answers' in td['class']:
-                inps = td.findAll('input')
-                if len(inps) > 1:
-                    labels = td.findAll('label')
-                    for label, i in zip(labels, zip):
-                        if i.get('value') == 1:
-                            cq.a = label.get_text()
+                inps = td.findAll('input', attrs={'type': 'radio'})
+                if len(inps) == 0:
+                    inps = td.findAll('input')
+                    if len(inps) > 1:
+                        labels = td.findAll('label')
+                        for label, i in zip(labels, inps):
+                            if i.get('value') == 1:
+                                cq.a = label.get_text()
+                    else:
+                        ans = inps[0].get('value')
+                        cq.a = ans
                 else:
-                    ans = inps[0].get('value')
-                    cq.a = ans
+                    labels = td.findAll('label')
+                    for label, i in zip(labels, inps):
+                        if i.get('checked') == 'checked':
+                            cq.a = label.get_text()
+
     return ETest('ds', '', tq)
 
 
@@ -170,4 +199,4 @@ if __name__ == "__main__":
     etest = parse_test(html.encode('utf-8'))
     print(etest.name)
     print(etest.ttype)
-    print(etest.q[0].q[0])
+    print(etest.q[0].html_h)

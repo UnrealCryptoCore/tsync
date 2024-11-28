@@ -1,2 +1,4 @@
 .env
 tsync.db
+dist
+__pycache__
