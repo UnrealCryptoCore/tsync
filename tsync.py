@@ -131,7 +131,8 @@ def get_etest(id, user_id) -> test_parser.ETest:
         for q in qs:
             quest = test_parser.Question(q[0], q[1], q[2])
             questions.append(quest)
-            res = db.cursor().execute("SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[3]))
+            res = db.cursor().execute(
+                "SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[3]))
             '''res = db.cursor().execute(
                 "SELECT question.answer, user.username FROM question, user WHERE question.topid=? AND question.question=? AND question.user_id!=? and user.id=question.user_id", (tq[0], q[0], user_id))'''
             others = res.fetchall()
@@ -204,6 +205,8 @@ def save_top_question(user_id, tid, tq: [test_parser.TopQuestion]):
                 "INSERT INTO question (id, topid, user_id, question, html_question) VALUES (?, ?, ?, ?, ?)", (qid, id, user_id, q.q, q.html_q))
         else:
             qid = res[0]
+            db.cursor().execute(
+                "DELETE FROM answer WHERE tid=? AND q_id=? AND user_id=?", (tid, qid, user_id))
         aid = str(uuid.uuid4())
         db.cursor().execute(
             "INSERT INTO answer (id, tid, q_id, user_id, answer) VALUES (?, ?, ?, ?, ?)", (aid, tid, qid, user_id, q.a))
@@ -218,8 +221,6 @@ def upload_file():
     try:
         etest = test_parser.parse_test(content)
     except Exception as e:
-        raise e
-        print('heere')
         return redirect("/?badfile=true")
     mktest = 'admin' in session and session['admin']
     id = get_test_by_path(etest.ttype, etest.name, mktest)
