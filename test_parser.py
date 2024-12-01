@@ -97,9 +97,11 @@ def parse_afi(phtml) -> ETest:
     div = phtml.body.find('form', attrs={'id': 'responseform'}).find('div')
     children = div.findAll('div', attrs={'class': 'que'})
     questions = []
-    tq = TopQuestion('', '', questions)
-    etest = ETest('afi', '', [tq])
+    #tq = TopQuestion('', '', questions)
+    etest = ETest('afi', '', questions)
+    i = 0
     for child in children:
+        i += 1
         content = child.find('div', attrs={'class': 'content'})
         quest = content.find('div', attrs={'class': 'qtext'})
         q = quest.get_text()
@@ -120,14 +122,26 @@ def parse_afi(phtml) -> ETest:
                         inp = ans.find('input', attrs={'type': 'checkbox'})
                     else:
                         inp = ans.find('input', attrs={'type': 'radio'})
-                    if inp.get('checked') == 'checked':
-                        a = ans.find('div')
-                        sanetize(a)
-                        answ.append(a.decode_contents())
-                answ = "; ".join(list(set(answ)))
+                    a = ans.find('div')
+                    sanetize(a)
+                    txt = a.get_text()
+                    quest = a.decode_contents()
+                    checked = inp.get('checked') == 'checked'
+                    answ.append((txt, quest, checked))
+                answ = list(set(answ))
+            else:
+                continue
 
-        questions.append(
-            Question(q, q_html, answ))
+        qs = None
+        if isinstance(answ, list):
+            qs = [Question(a, b, 'selected' if c else '-') for a, b, c in answ]
+            hint = q
+            html_hint = q_html
+        else:
+            qs = [Question(q, q_html, answ)]
+            hint = 'Frage ' + str(i)
+            html_hint = 'Frage ' + str(i)
+        questions.append(TopQuestion(hint, html_hint, qs))
     return etest
 
 
@@ -174,6 +188,9 @@ def sanetize(a):
     dupls = a.findAll('span', attrs={'class': 'MJX_Assistive_MathML'})
     for dupl in dupls:
         dupl.decompose()
+    imgs = a.findAll('img')
+    for img in imgs:
+        img['src'] = "/".join(img['src'].split('/')[1:])
 
 
 def make_compatible(content):
@@ -195,8 +212,8 @@ def parse_test(content: str) -> ETest:
 
 
 if __name__ == "__main__":
-    html = open("data/ti7.html", "r").read()
+    html = open("data/bl07afi.html", "r").read()
     etest = parse_test(html.encode('utf-8'))
     print(etest.name)
     print(etest.ttype)
-    print(etest.q[0].html_h)
+    print(etest.q[0].q[8])

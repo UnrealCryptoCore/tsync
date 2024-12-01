@@ -15,12 +15,14 @@
             <div class="question">
                 <span>{{ q.html_q | safe }}</span>
                 <span class="q-input">
-                    <div class="answer">{{ q.a | safe }}</div>
+                    <div class="answer"><span class="answer-value">{{ q.a | safe }}</span><span>{{ q.others[q.a] }}</span></div>
                     {% for key in q.others %}
+                    {% if key != q.a %}
                     <div class="other">
                         <span style="color: {{ 'blue' if key == q.a else 'red' }};">{{ key | safe }}: </span>
                         <span>{{ q.others[key] }}</span>
                     </div>
+                    {% endif %}
                     {% endfor %}
                 </span>
             </div>
