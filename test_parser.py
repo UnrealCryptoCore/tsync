@@ -96,8 +96,9 @@ def parse_ti(phtml) -> ETest:
 def parse_afi(phtml) -> ETest:
     div = phtml.body.find('form', attrs={'id': 'responseform'}).find('div')
     children = div.findAll('div', attrs={'class': 'que'})
-    questions = []
-    #tq = TopQuestion('', '', questions)
+    subqs = []
+    tq = TopQuestion('', '', subqs)
+    questions = [tq]
     etest = ETest('afi', '', questions)
     i = 0
     for child in children:
@@ -111,6 +112,7 @@ def parse_afi(phtml) -> ETest:
         if 'numerical' in child['class']:
             answ = content.find('div', attrs={'class': 'ablock'}).find('input')
             answ = answ.get('value')
+            subqs.append(Question(q, q_html, answ))
         else:
             mcs = 'multichoiceset' in child['class']
             if mcs or 'multichoice' in child['class']:
@@ -132,16 +134,16 @@ def parse_afi(phtml) -> ETest:
             else:
                 continue
 
-        qs = None
-        if isinstance(answ, list):
-            qs = [Question(a, b, 'selected' if c else '-') for a, b, c in answ]
-            hint = q
-            html_hint = q_html
-        else:
-            qs = [Question(q, q_html, answ)]
-            hint = 'Frage ' + str(i)
-            html_hint = 'Frage ' + str(i)
-        questions.append(TopQuestion(hint, html_hint, qs))
+            qs = None
+            if isinstance(answ, list):
+                qs = [Question(a, b, 'wahr' if c else 'falsch') for a, b, c in answ]
+                hint = q
+                html_hint = q_html
+            else:
+                qs = [Question(q, q_html, answ)]
+                hint = 'Frage ' + str(i)
+                html_hint = 'Frage ' + str(i)
+            questions.append(TopQuestion(hint, html_hint, qs))
     return etest
 
 
