@@ -212,7 +212,7 @@ def sanetize(a):
 
 
 def make_compatible(content):
-    return content.decode('utf-8').replace('\r\n', '\n').replace('\n', '')
+    return content.decode('utf-8').replace('\r\n', '\n').replace('\n', ' ')
 
 
 def parse_test(content: str) -> ETest:
