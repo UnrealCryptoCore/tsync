@@ -1,0 +1,2 @@
+recursive-include src/tsync/templates *
+recursive-include src/tsync/static *

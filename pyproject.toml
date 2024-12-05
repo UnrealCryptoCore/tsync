@@ -4,7 +4,18 @@ version = "1.0.0"
 description = "A website to compare etests."
 dependencies = [
     "flask",
+    "python-dotenv",
+    "bcrypt",
+    "beautifulsoup4",
+    "gunicorn",
 ]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.find]
+where = ["src"]
 
 [build-system]
 requires = ["flit_core<4"]
