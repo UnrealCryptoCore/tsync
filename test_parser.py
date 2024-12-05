@@ -67,27 +67,42 @@ def parse_ti(phtml) -> ETest:
     for question in questions:
         content = question.find('div', attrs={'class': 'content'})
         if 'multianswer' in question['class']:
-            tr = content.findAll('tr')
+            table = question.find('table')
             q = []
-            for r in tr[1:]:
-                answer = r.find(
-                    'option', attrs={'selected': 'selected'})
-                row = r.findAll('td')[:-1]
-                rowq = ",".join([s.get_text() for s in row])
-                rowq_html = " | ".join([s.decode_contents() for s in row])
-                q.append(Question(rowq, rowq_html, answer.get_text()))
-            for sel in content.findAll('select'):
-                sel.decompose()
+            if table:
+                tr = content.findAll('tr')
+                for r in tr[1:]:
+                    answer = r.find(
+                        'option', attrs={'selected': 'selected'})
+                    row = r.findAll('td')[:-1]
+                    rowq = ",".join([s.get_text() for s in row])
+                    rowq_html = " | ".join([s.decode_contents() for s in row])
+                    q.append(Question(rowq, rowq_html, answer.get_text()))
+                for sel in content.findAll('select'):
+                    sel.decompose()
+            else:
+                subs = question.findAll('span', attrs={'class': 'subquestion'})
+                i = 1
+                for sub in subs:
+                    i += 1
+                    answer = sub.find(
+                        'option', attrs={'selected': 'selected'})
+                    q.append(Question(f"Frage {i}", f"Frage {
+                             i}", answer.get_text()))
 
-            top_question = TopQuestion(content.get_text(), content.decode_contents(), q)
+            top_question = TopQuestion(
+                content.get_text(), content.decode_contents(), q)
             tq.append(top_question)
+
         if 'calculated' in question['class']:
             qtext = content.find('div', attrs={'class': 'qtext'})
             ablock = content.find('div', attrs={'class': 'ablock'})
             inp = ablock.find('input')
             label = ablock.find('label')
-            q = [Question(label.get_text(), label.decode_contents(), inp.get('value'))]
-            top_question = TopQuestion(qtext.get_text(), qtext.decode_contents(), q)
+            q = [Question(label.get_text(),
+                          label.decode_contents(), inp.get('value'))]
+            top_question = TopQuestion(
+                qtext.get_text(), qtext.decode_contents(), q)
             tq.append(top_question)
 
     return ETest('ti', '', tq)
@@ -136,7 +151,8 @@ def parse_afi(phtml) -> ETest:
 
             qs = None
             if isinstance(answ, list):
-                qs = [Question(a, b, 'wahr' if c else 'falsch') for a, b, c in answ]
+                qs = [Question(a, b, 'wahr' if c else 'falsch')
+                      for a, b, c in answ]
                 hint = q
                 html_hint = q_html
             else:
@@ -214,8 +230,8 @@ def parse_test(content: str) -> ETest:
 
 
 if __name__ == "__main__":
-    html = open("data/bl07afi.html", "r").read()
+    html = open("data/ti8.html", "r").read()
     etest = parse_test(html.encode('utf-8'))
     print(etest.name)
     print(etest.ttype)
-    print(etest.q[0].q[8])
+    print(len(etest.q))
