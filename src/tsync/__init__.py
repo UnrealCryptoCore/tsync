@@ -41,6 +41,10 @@ def create_app():
     def hello_world():
         return "<p>Hello, World!</p>"
 
+    @app.get("/resources")
+    def resources():
+        return render_template("resourcestmpl.html")
+
     @app.get("/account")
     def account():
         if 'id' not in session:
