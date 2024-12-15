@@ -87,8 +87,7 @@ def parse_ti(phtml) -> ETest:
                     i += 1
                     answer = sub.find(
                         'option', attrs={'selected': 'selected'})
-                    q.append(Question(f"Frage {i}", f"Frage {
-                             i}", answer.get_text()))
+                    q.append(Question(f"Frage {i}", f"Frage {i}", answer.get_text()))
 
             top_question = TopQuestion(
                 content.get_text(), content.decode_contents(), q)
