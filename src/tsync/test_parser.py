@@ -130,7 +130,8 @@ def parse_afi(phtml) -> ETest:
             subqs.append(Question(q, q_html, answ))
         else:
             mcs = 'multichoiceset' in child['class']
-            if mcs or 'multichoice' in child['class']:
+            tf = 'truefalse' in child['class']
+            if mcs or tf or 'multichoice' in child['class']:
                 answers = content.find(
                     'div', attrs={'class': 'answer'}).findAll('div', attrs={'class': ['r0', 'r1']})
                 answ = []
@@ -139,7 +140,10 @@ def parse_afi(phtml) -> ETest:
                         inp = ans.find('input', attrs={'type': 'checkbox'})
                     else:
                         inp = ans.find('input', attrs={'type': 'radio'})
-                    a = ans.find('div')
+                    if tf:
+                        a = ans.find('label')
+                    else:
+                        a = ans.find('div')
                     sanetize(a)
                     txt = a.get_text()
                     quest = a.decode_contents()
@@ -230,7 +234,7 @@ def parse_test(content: str) -> ETest:
 
 
 if __name__ == "__main__":
-    html = open("data/ti8.html", "r").read()
+    html = open("data/bl9afi.html", "r").read()
     etest = parse_test(html.encode('utf-8'))
     print(etest.name)
     print(etest.ttype)
