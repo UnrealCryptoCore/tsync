@@ -174,6 +174,7 @@ def parse_ds(phtml) -> ETest:
     tq = []
     for idx, qst in enumerate(tqs):
         tds = qst.findAll('td')
+        ctq = TopQuestion("", "", [])
         for td in tds:
             sanetize(td)
             contents = td.decode_contents()
@@ -201,6 +202,8 @@ def parse_ds(phtml) -> ETest:
                     for label, i in zip(labels, inps):
                         if i.get('checked') == 'checked':
                             cq.a = label.get_text()
+        if len(ctq.q) > 0:
+            tq.append(ctq)
 
     return ETest('ds', '', tq)
 
@@ -233,7 +236,7 @@ def parse_test(content: str) -> ETest:
 
 
 if __name__ == "__main__":
-    html = open("data/bl9afi.html", "r").read()
+    html = open("data/Blatt 9ds.html", "r").read()
     etest = parse_test(html.encode('utf-8'))
     print(etest.name)
     print(etest.ttype)

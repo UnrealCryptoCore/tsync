@@ -130,11 +130,8 @@ def create_app():
                 questions.append(quest)
                 res = db.cursor().execute(
                     "SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[3]))
-                '''res = db.cursor().execute(
-                    "SELECT question.answer, user.username FROM question, user WHERE question.topid=? AND question.question=? AND question.user_id!=? and user.id=question.user_id", (tq[0], q[0], user_id))'''
                 others = res.fetchall()
                 quest.others = {}
-                print(id, others)
                 for other in others:
                     if other[0] in quest.others:
                         quest.others[other[0]].append(other[1])
