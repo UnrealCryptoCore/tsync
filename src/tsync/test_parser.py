@@ -225,11 +225,11 @@ def parse_test(content: str) -> ETest:
     content = make_compatible(content)
     parsed_html = BeautifulSoup(content, 'html.parser')
     names = path(parsed_html)
-    if names[0] == ' (UE) Diskrete Strukturen ':
+    if names[0] == '(UE) Diskrete Strukturen':
         etest = parse_ds(parsed_html)
-    elif names[0] == ' (VO) Analysis für Informatik ':
+    elif names[0] == '(VO) Analysis für Informatik':
         etest = parse_afi(parsed_html)
-    elif names[0] == ' (VU) Einführung in die Technische Informatik ':
+    elif names[0] == '(VU) Einführung in die Technische Informatik':
         etest = parse_ti(parsed_html)
     etest.name = names[-1]
     return etest
