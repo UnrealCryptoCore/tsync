@@ -16,3 +16,6 @@ build/
 .env
 tsync.db
 data/
+
+.vscode/
+.idea/

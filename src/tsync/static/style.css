@@ -49,16 +49,25 @@ h3 {
     text-decoration: none;
 }
 
-.hist-list {
-    padding-left: 0;
+.hist-table {
+    display: table;
+}
+
+.hist-table-column {
+    display: table-cell;
+    width: 20rem;
+    vertical-align: top;
 }
 
 .hist-item {
-    list-style: none;
+    display: block;
     color: #333;
     margin-block: 0.2rem;
     font-size: 1.2rem;
-    width: 15rem;
+}
+
+.hist-table-header {
+    font-size: 2rem;
 }
 
 .top-question {

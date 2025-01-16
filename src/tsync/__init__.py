@@ -224,7 +224,17 @@ def create_app():
         db = get_db()
         res = db.cursor().execute("SELECT id, name, ttype FROM etest")
         res = res.fetchall()
-        return res
+
+        blaetter = {
+            'afi': [],
+            'ds': [],
+            'ti': []}
+
+            
+        for (id, name, ttype) in res:
+            blaetter[ttype].append((id, name, ttype))
+
+        return blaetter
 
     @app.route("/")
     def index():
