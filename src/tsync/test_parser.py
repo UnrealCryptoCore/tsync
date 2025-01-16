@@ -27,7 +27,7 @@ class ETest:
     def __init__(self, ttype, name, q):
         self.ttype = ttype
         self.name = name
-        self.q: [TopQuestion] = q
+        self.q: list[TopQuestion] = q
 
 
 def answers_ds(phtml):
