@@ -50,7 +50,7 @@ def path(phtml):
     path = phtml.body.findAll('li', attrs={'class': 'breadcrumb-item'})
     names = []
     for n in path:
-        names.append(n.get_text())
+        names.append(n.get_text().strip())
     return names
 
 
