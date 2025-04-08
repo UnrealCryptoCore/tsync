@@ -228,9 +228,9 @@ def create_app():
         blaetter = {
             'afi': [],
             'ds': [],
-            'ti': []}
+            'ti': [],
+            'la': []}
 
-            
         for (id, name, ttype) in res:
             blaetter[ttype].append((id, name, ttype))
 

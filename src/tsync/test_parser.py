@@ -167,6 +167,16 @@ def parse_afi(phtml) -> ETest:
 
 
 def parse_ds(phtml) -> ETest:
+    tq = parse_ds_la(phtml)
+    return ETest('ds', '', tq)
+
+
+def parse_la(phtml) -> ETest:
+    tq = parse_ds_la(phtml)
+    return ETest('la', '', tq)
+
+
+def parse_ds_la(phtml):
     div = phtml.body.find('div', attrs={'class': 'okutable'})
     tqs = div.find('table').findAll('tr')
     ctq = None
@@ -205,7 +215,7 @@ def parse_ds(phtml) -> ETest:
         if len(ctq.q) > 0:
             tq.append(ctq)
 
-    return ETest('ds', '', tq)
+    return tq
 
 
 def sanetize(a):
@@ -225,12 +235,16 @@ def parse_test(content: str) -> ETest:
     content = make_compatible(content)
     parsed_html = BeautifulSoup(content, 'html.parser')
     names = path(parsed_html)
+    print(names)
     if names[0] == '(UE) Diskrete Strukturen':
         etest = parse_ds(parsed_html)
     elif names[0] == '(VO) Analysis für Informatik':
         etest = parse_afi(parsed_html)
     elif names[0] == '(VU) Einführung in die Technische Informatik':
         etest = parse_ti(parsed_html)
+    elif names[0] == '(UE) Lineare Algebra für Informatik (Tutorien)':
+        print("yes")
+        etest = parse_la(parsed_html)
     etest.name = names[-1]
     return etest
 
