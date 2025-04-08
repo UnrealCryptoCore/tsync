@@ -7,13 +7,13 @@
 {% block content %}
 <h2>{{ test.ttype + " - " + test.name }}</h2>
 <div class="questions">
-    {% for tq in test.q %}
+    {% for idx0, tq in enumerate(test.q) %}
     <div class="top-question">
-        <p>{{ tq.html_h|safe }}</p>
+        <p><span>{{ tq.html_h|safe }}</span></p>
         <div>
-            {% for q in tq.q %}
+            {% for idx1, q in enumerate(tq.q) %}
             <div class="question">
-                <span>{{ q.html_q | safe }}</span>
+                <span><span>{{ idx0 + 1 }}.{{ idx1 + 1 }}</span><span>{{ q.html_q | safe }}</span></span>
                 <span class="q-input">
                     <div class="answer"><span class="answer-value">{{ q.a | safe }}</span><span>{{ q.others[q.a] }}</span></div>
                     {% for key in q.others %}

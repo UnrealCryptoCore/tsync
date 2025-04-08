@@ -150,7 +150,7 @@ def create_app():
         test = get_etest(testid, user_id)
         if test is None:
             return render_template("testnotfoundtmpl.html"), 404
-        return render_template("testtmpl.html", test=test)
+        return render_template("testtmpl.html", test=test, enumerate=enumerate)
 
     def get_test_by_path(ttype, name, mktest):
         db = get_db()
