@@ -56,7 +56,7 @@ def setup_db():
     cur.execute(
         "CREATE TABLE question(id CHAR(36), topid CHAR(36), user_id CHAR(36), question VARCHAR(1024),html_question TEXT)")
     cur.execute(
-        "CREATE TABLE answer(id CHAR(36), tid CHAR(36), q_id CHAR(36), user_id CHAR(36), answer VARCHAR(511))")
+        "CREATE TABLE answer(id CHAR(36), tid CHAR(36), q_id CHAR(36), user_id CHAR(36), answer VARCHAR(511)), sort_id INTEGER")
 
     add_user("admin", "admin", True)
     add_user("test", "test", False)

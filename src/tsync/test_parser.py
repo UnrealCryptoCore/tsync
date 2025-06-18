@@ -4,6 +4,15 @@ except ImportError:
     from bs4 import BeautifulSoup
 
 
+class Answer:
+    def __init__(self, val, sortId):
+        self.val = val
+        self.sortId = sortId
+
+    def __str__(self):
+        return self.val
+
+
 class Question:
     def __init__(self, q, html_q, a):
         self.q = q
@@ -16,11 +25,14 @@ class Question:
 
 
 class TopQuestion:
-    def __init__(self, h: str, html_h: str, q: [Question]):
+    def __init__(self, h: str, html_h: str, q: list[Question]):
         self.h = h
         self.html_h = html_h
-        self.q = q
+        self.q: list[Question] = q
         self.qtype = None
+
+    def sort(self):
+        self.q = sorted(self.q, key=lambda q: q.a.sortId)
 
 
 class ETest:
@@ -28,6 +40,10 @@ class ETest:
         self.ttype = ttype
         self.name = name
         self.q: list[TopQuestion] = q
+
+    def sort(self):
+        for q in self.q:
+            q.sort()
 
 
 def answers_ds(phtml):
@@ -115,6 +131,7 @@ def parse_afi(phtml) -> ETest:
     questions = [tq]
     etest = ETest('afi', '', questions)
     i = 0
+    ac = 0
     for child in children:
         i += 1
         content = child.find('div', attrs={'class': 'content'})
@@ -125,7 +142,8 @@ def parse_afi(phtml) -> ETest:
         answ = ""
         if 'numerical' in child['class']:
             answ = content.find('div', attrs={'class': 'ablock'}).find('input')
-            answ = answ.get('value')
+            answ = Answer(answ.get('value'), ac)
+            ac += 1
             subqs.append(Question(q, q_html, answ))
         else:
             mcs = 'multichoiceset' in child['class']
@@ -154,12 +172,15 @@ def parse_afi(phtml) -> ETest:
 
             qs = None
             if isinstance(answ, list):
-                qs = [Question(a, b, 'wahr' if c else 'falsch')
-                      for a, b, c in answ]
+                qs = []
+                for a, b, c in answ:
+                    qs.append(Question(a, b, Answer('wahr' if c else 'falsch', ac)))
+                    ac += 1
                 hint = q
                 html_hint = q_html
             else:
-                qs = [Question(q, q_html, answ)]
+                qs = [Question(q, q_html, Answer(answ, ac))]
+                ac += 1
                 hint = 'Frage ' + str(i)
                 html_hint = 'Frage ' + str(i)
             questions.append(TopQuestion(hint, html_hint, qs))
@@ -181,6 +202,7 @@ def parse_ds_la(phtml):
     tqs = div.find('table').findAll('tr')
     ctq = None
     cq = None
+    ac = 0
     tq = []
     for idx, qst in enumerate(tqs):
         tds = qst.findAll('td')
@@ -207,11 +229,15 @@ def parse_ds_la(phtml):
                     else:
                         ans = inps[0].get('value')
                         cq.a = ans
+                        cq.a = Answer(ans, ac)
+                        ac += 1
                 else:
                     labels = td.findAll('label')
                     for label, i in zip(labels, inps):
                         if i.get('checked') == 'checked':
                             cq.a = label.get_text()
+                            cq.a = Answer(label.get_text(), ac)
+                            ac += 1
         if len(ctq.q) > 0:
             tq.append(ctq)
 

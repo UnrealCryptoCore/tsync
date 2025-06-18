@@ -77,7 +77,6 @@ def create_app():
         res = db.cursor().execute(
             "UPDATE user SET passhash=? WHERE id=? AND passhash=?", (nhash, id, ohash))
         res = db.commit()
-        print(res)
         return redirect("/account")
 
     @app.get("/login")
@@ -122,14 +121,14 @@ def create_app():
         for tq in tqs:
             topq = test_parser.TopQuestion(tq[1], tq[2], [])
             res = db.cursor().execute(
-                "SELECT question, html_question, answer, question.id FROM question, answer WHERE answer.q_id=question.id AND topid=? AND answer.user_id=?", (tq[0], user_id))
+                "SELECT question, html_question, answer, answer.sort_id, question.id FROM question, answer WHERE answer.q_id=question.id AND topid=? AND answer.user_id=?", (tq[0], user_id))
             qs = res.fetchall()
             questions = []
             for q in qs:
-                quest = test_parser.Question(q[0], q[1], q[2])
+                quest = test_parser.Question(q[0], q[1], test_parser.Answer(q[2], q[3]))
                 questions.append(quest)
                 res = db.cursor().execute(
-                    "SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[3]))
+                    "SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[4]))
                 others = res.fetchall()
                 quest.others = {}
                 for other in others:
@@ -140,6 +139,7 @@ def create_app():
 
             topq.q = questions
             topqs.append(topq)
+        test.sort()
         return test
 
     @app.get("/test/<testid>")
@@ -158,7 +158,6 @@ def create_app():
             "SELECT id FROM etest WHERE ttype=? AND name=?", (ttype, name))
 
         test = res.fetchone()
-        print(test)
         if test is None and mktest:
             id = str(uuid.uuid4())
             res = db.cursor().execute(
@@ -199,7 +198,7 @@ def create_app():
                     "DELETE FROM answer WHERE tid=? AND q_id=? AND user_id=?", (tid, qid, user_id))
             aid = str(uuid.uuid4())
             db.cursor().execute(
-                "INSERT INTO answer (id, tid, q_id, user_id, answer) VALUES (?, ?, ?, ?, ?)", (aid, tid, qid, user_id, q.a))
+                "INSERT INTO answer (id, tid, q_id, user_id, answer, sort_id) VALUES (?, ?, ?, ?, ?, ?)", (aid, tid, qid, user_id, q.a.val, q.a.sortId))
 
         db.commit()
 
