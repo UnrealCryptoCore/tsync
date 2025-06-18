@@ -15,11 +15,11 @@
             <div class="question">
                 <span><span>{{ idx0 + 1 }}.{{ idx1 + 1 }}</span><span>{{ q.html_q | safe }}</span></span>
                 <span class="q-input">
-                    <div class="answer"><span class="answer-value">{{ q.a | safe }}</span><span>{{ q.others[q.a] }}</span></div>
+                    <div class="answer"><span class="answer-value">{{ q.a.val | safe }}</span><span>{{ q.others[q.a.val] }}</span></div>
                     {% for key in q.others %}
-                    {% if key != q.a %}
+                    {% if key != q.a.val %}
                     <div class="other">
-                        <span style="color: {{ 'blue' if key == q.a else 'red' }};">{{ key | safe }}: </span>
+                        <span style="color: {{ 'blue' if key == q.a.val else 'red' }};">{{ key | safe }}: </span>
                         <span>{{ q.others[key] }}</span>
                     </div>
                     {% endif %}
