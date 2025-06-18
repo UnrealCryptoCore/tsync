@@ -1,4 +1,4 @@
-from flask import Flask, redirect, render_template, request, session, g
+from flask import Flask, redirect, render_template, request, session, g, flash
 from dotenv import load_dotenv
 import sqlite3
 import bcrypt
@@ -209,9 +209,11 @@ def create_app():
         content = f.read()
         try:
             etest = test_parser.parse_test(content)
-        except Exception as e:
-            return redirect("/?badfile=true")
-        mktest = 'admin' in session and session['admin']
+        except Exception:
+            flash("Input file is invalid.", 'error')
+            return render_template("indextmpl.html")
+        # mktest = 'admin' in session and session['admin']
+        mktest = True
         id = get_test_by_path(etest.ttype, etest.name, mktest)
         if id is None:
             return "Test does not exist", 403
@@ -241,8 +243,7 @@ def create_app():
         if "username" not in session:
             return redirect("/login")
         hist = get_history()
-        badfile = request.args.get('badfile') in ['True', 'true']
-        return render_template("indextmpl.html", hist=hist, badfile=badfile)
+        return render_template("indextmpl.html", hist=hist)
 
     return app
 

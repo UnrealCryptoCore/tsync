@@ -3,13 +3,16 @@
 {% block content %}
 <div>
     <div>
-        {% if badfile %}
-        <div class="error">
-            <h4>Error</h4>
-            <p>Input file was invalid</p>
-        </div>
-        {% endif %}
-
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <div class="error">
+            {% for message in messages %}
+                <h4>Error</h4>
+                <p>{{ message }}</p>
+            {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
         <form method="post" enctype="multipart/form-data" action="/upload">
             <label>Test Upload</label>
             <br>
