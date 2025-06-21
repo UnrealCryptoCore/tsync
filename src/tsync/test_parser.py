@@ -269,7 +269,6 @@ def parse_test(content: str) -> ETest:
     elif names[0] == '(VU) Einführung in die Technische Informatik':
         etest = parse_ti(parsed_html)
     elif names[0] == '(UE) Lineare Algebra für Informatik (Tutorien)':
-        print("yes")
         etest = parse_la(parsed_html)
     etest.name = names[-1]
     return etest

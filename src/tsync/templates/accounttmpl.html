@@ -13,6 +13,25 @@
     <span>Name: </span><span>{{ username }}</span>
     <br>
     <span>UserId: </span><span>{{ id }}</span>
+    <br>
+    <span>
+        API Key:
+        {%if key %}
+            <code>
+            {{ key }}
+            </code>
+            <button onclick="navigator.clipboard.writeText('{{ key }}')">copy</button>
+            <button onclick="window.location.href='/account?key=False'">hide</button>
+        {% else %}
+            <button onclick="window.location.href='/account?key=True'">show</button>
+            <form action="/apikey-create" method="post">
+                <input type="submit" value="generate">
+            </form>
+       {% endif %}
+        <form action="/apikey-delete" method="post">
+            <input type="submit" value="delete">
+        </form>
+    </span>
 </div>
 <form action="/resetpass" method="post">
     {% if passfail %}
@@ -20,7 +39,7 @@
         Wrong password or passwords do not match.
     </div>
     {% endif %}
-    <h2>Reset password</h2>
+    <h3>Reset password</h3>
     <label>old password</label>
     <input type="password" name="opass">
     <br>

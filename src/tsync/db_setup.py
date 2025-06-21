@@ -47,7 +47,7 @@ def setup_db():
     cur = con.cursor()
 
     cur.execute(
-        "CREATE TABLE user(id CHAR(36), username VARCHAR(63), passhash CHAR(60), admin BOOL)")
+        "CREATE TABLE user(id CHAR(36), username VARCHAR(63), passhash CHAR(60), admin BOOL, api_key CHAR(32))")
 
     cur.execute(
         "CREATE TABLE etest(id CHAR(36), ttype VARCHAR(255), name VARCHAR(255))")
@@ -56,7 +56,7 @@ def setup_db():
     cur.execute(
         "CREATE TABLE question(id CHAR(36), topid CHAR(36), user_id CHAR(36), question VARCHAR(1024),html_question TEXT)")
     cur.execute(
-        "CREATE TABLE answer(id CHAR(36), tid CHAR(36), q_id CHAR(36), user_id CHAR(36), answer VARCHAR(511)), sort_id INTEGER")
+        "CREATE TABLE answer(id CHAR(36), tid CHAR(36), q_id CHAR(36), user_id CHAR(36), answer VARCHAR(511), sort_id INTEGER)")
 
     add_user("admin", "admin", True)
     add_user("test", "test", False)

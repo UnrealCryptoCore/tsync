@@ -1,10 +1,11 @@
-from flask import Flask, redirect, render_template, request, session, g, flash
+from flask import Flask, redirect, render_template, request, session, g, flash, jsonify
 from dotenv import load_dotenv
 import sqlite3
 import bcrypt
 import os
 import uuid
 import sys
+import secrets
 
 
 class User:
@@ -20,6 +21,7 @@ def create_app():
 
     salt = os.getenv("SALT").encode("utf-8")
     DATABASE = 'tsync.db'
+    URL = os.getenv("URL")
 
     app = Flask(__name__)
     app.secret_key = os.getenv("SECRET").encode("utf-8")
@@ -45,6 +47,10 @@ def create_app():
     def resources():
         return render_template("resourcestmpl.html")
 
+    @app.get("/typermonkey")
+    def typer_monkey():
+        return render_template("typermonkeytmpl.html")
+
     @app.get("/account")
     def account():
         if 'id' not in session:
@@ -52,7 +58,15 @@ def create_app():
         id = session['id']
         username = session['username']
         passfail = request.args.get('passfail') in ['true', 'True', '1']
-        return render_template("accounttmpl.html", passfail=passfail, username=username, id=id)
+        usekey = request.args.get('key') in ['true', 'True', '1']
+        key = ""
+        if usekey:
+            db = get_db()
+            res = db.execute("SELECT api_key FROM user WHERE id=?", (id,))
+            res = res.fetchone()
+            if res:
+                key = res[0]
+        return render_template("accounttmpl.html", passfail=passfail, username=username, id=id, key=key)
 
     @app.post("/resetpass")
     def reset_pass():
@@ -77,6 +91,31 @@ def create_app():
         res = db.cursor().execute(
             "UPDATE user SET passhash=? WHERE id=? AND passhash=?", (nhash, id, ohash))
         res = db.commit()
+        return redirect("/account")
+
+    @app.post("/apikey-create")
+    def make_apikey():
+        if 'id' not in session:
+            return redirect("/login")
+
+        id = session['id']
+        key = secrets.token_urlsafe(32)
+
+        db = get_db()
+        db.cursor().execute("UPDATE user SET api_key=? WHERE id=?", (key, id))
+        db.commit()
+        return redirect("/account?key=True")
+
+    @app.post("/apikey-delete")
+    def delete_apikey():
+        if 'id' not in session:
+            return redirect("/login")
+
+        id = session['id']
+        db = get_db()
+        db.cursor().execute("UPDATE user SET api_key=NULL WHERE id=?", (id,))
+        db.commit()
+
         return redirect("/account")
 
     @app.get("/login")
@@ -125,7 +164,8 @@ def create_app():
             qs = res.fetchall()
             questions = []
             for q in qs:
-                quest = test_parser.Question(q[0], q[1], test_parser.Answer(q[2], q[3]))
+                quest = test_parser.Question(
+                    q[0], q[1], test_parser.Answer(q[2], q[3]))
                 questions.append(quest)
                 res = db.cursor().execute(
                     "SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[4]))
@@ -202,23 +242,31 @@ def create_app():
 
         db.commit()
 
-    @app.post('/upload')
-    def upload_file():
-        f = request.files['file']
-        content = f.read()
+    def handle_upload(content: str):
         try:
             etest = test_parser.parse_test(content)
         except Exception:
-            flash("Input file is invalid.", 'error')
-            return render_template("indextmpl.html")
+            return None, ("Input file is invalid", 400)
         # mktest = 'admin' in session and session['admin']
         mktest = True
         id = get_test_by_path(etest.ttype, etest.name, mktest)
         if id is None:
-            return "Test does not exist", 403
+            return None, ("Test does not exist", 403)
         user_id = session["id"]
         for tq in etest.q:
             save_top_question(user_id, id, tq)
+        return id, None
+
+    @app.post('/upload')
+    def upload_file():
+        if "username" not in session:
+            return redirect("/login")
+        f = request.files['file']
+        content = f.read()
+        id, err = handle_upload(content)
+        if err:
+            flash(err[0], 'error')
+            return render_template("indextmpl.html"), err[1]
         return redirect(f"/test/{id}")
 
     def get_history():
@@ -226,16 +274,39 @@ def create_app():
         res = db.cursor().execute("SELECT id, name, ttype FROM etest")
         res = res.fetchall()
 
-        blaetter = {
+        modules = {
             'afi': [],
             'ds': [],
             'ti': [],
             'la': []}
 
         for (id, name, ttype) in res:
-            blaetter[ttype].append((id, name, ttype))
+            modules[ttype].append((id, name, ttype))
 
-        return blaetter
+        return modules
+
+    @app.post("/api/upload")
+    def api_upload():
+        key = request.headers.get("tsync-api-key")
+        db = get_db()
+
+        res = db.cursor().execute("SELECT id FROM user WHERE api_key=?", (key,))
+        res = res.fetchone()
+        if res is None:
+            return "Unauthorized: Invalid API Key", 401
+        content = request.get_data()
+        id, err = handle_upload(content)
+        if err:
+            return err
+        return jsonify({"testid": id}), 200
+
+    @app.get("/tsync.user.js")
+    def tm_script():
+        if "username" not in session:
+            return redirect("/login")
+        return render_template("tsync.user.js", url=URL), 200, {
+            'Content-Type': 'application/javascript'
+        }
 
     @app.route("/")
     def index():

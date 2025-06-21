@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Typermonkey{% endblock %}
+{% block content %}
+<h1>Typermonkey</h1>
+<div>
+    You can use a typermonkey script to upload the test directly from moodle.
+    <br>
+    To use the script do the following:
+    
+    <ol>
+        <li>Download the typermonkey extension if you haven't already.</li>
+        <li>Click this <a href="/tsync.user.js">link</a> to download the script.</li>
+        <li>Open a test in moodle. If the script is active, a few buttons in the bottom left corner should have appeared.</li>
+        <li>Add your api-key (by pressing the corresponding button). You can create an api-key in your tsync account settings.</li>
+        <li>If everything worked, pressing the update button in moodle should now update the test in tsync.</li>
+    </ol>
+</div>
+{% endblock %}
