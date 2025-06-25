@@ -26,11 +26,12 @@
     }
 
     function tsync() {
+        if (!apiKey) {
+            error.textContent = "No api key specified.";
+        }
         updateInputs();
         let fullHTML = document.body.outerHTML;
-        if (!autoUpdate) {
-            info.textContent = "everything up to date";
-        }
+
         GM_xmlhttpRequest({
             method: "POST",
             url: url + "/api/upload",
@@ -40,10 +41,17 @@
             },
             data: fullHTML,
             onload: function(response) {
-                console.log(response);
+                if (response.status == 200) {
+                    if (!autoUpdate) {
+                        info.textContent = "everything up to date";
+                    }
+                }
+                else {
+                    error.textContent = "Failed to upload test: " + response.statusText;
+                }
             },
             onerror: function(error) {
-                console.error("Failed to fetch HTML:", error);
+                error.textContent = "Failed to upload test.";
             }
         });
     }
@@ -119,6 +127,10 @@
     info.textContent = "";
     box.appendChild(info);
 
+    const error = document.createElement('div');
+    error.textContent = "";
+    error.style.color = "red";
+    box.appendChild(error);
 
     document.body.appendChild(box);
 
