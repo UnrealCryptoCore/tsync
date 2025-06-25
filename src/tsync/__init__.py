@@ -47,9 +47,9 @@ def create_app():
     def resources():
         return render_template("resourcestmpl.html")
 
-    @app.get("/typermonkey")
-    def typer_monkey():
-        return render_template("typermonkeytmpl.html")
+    @app.get("/tampermonkey")
+    def tamper_monkey():
+        return render_template("tampermonkeytmpl.html")
 
     @app.get("/account")
     def account():
@@ -278,7 +278,8 @@ def create_app():
             'afi': [],
             'ds': [],
             'ti': [],
-            'la': []}
+            'la': [],
+            'fosap': []}
 
         for (id, name, ttype) in res:
             modules[ttype].append((id, name, ttype))

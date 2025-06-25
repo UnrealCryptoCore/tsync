@@ -123,13 +123,23 @@ def parse_ti(phtml) -> ETest:
     return ETest('ti', '', tq)
 
 
+def parse_fosap(phtml) -> ETest:
+    tq = parse_afi_fosap(phtml)
+    return ETest('fosap', '', tq)
+
+
 def parse_afi(phtml) -> ETest:
+    tq = parse_afi_fosap(phtml)
+    return ETest('afi', '', tq)
+
+
+def parse_afi_fosap(phtml) -> ETest:
     div = phtml.body.find('form', attrs={'id': 'responseform'}).find('div')
     children = div.findAll('div', attrs={'class': 'que'})
     subqs = []
     tq = TopQuestion('', '', subqs)
     questions = [tq]
-    etest = ETest('afi', '', questions)
+    # etest = ETest('afi', '', questions)
     i = 0
     ac = 0
     for child in children:
@@ -184,7 +194,7 @@ def parse_afi(phtml) -> ETest:
                 hint = 'Frage ' + str(i)
                 html_hint = 'Frage ' + str(i)
             questions.append(TopQuestion(hint, html_hint, qs))
-    return etest
+    return questions
 
 
 def parse_ds(phtml) -> ETest:
@@ -266,6 +276,8 @@ def parse_test(content: str) -> ETest:
         etest = parse_ds(parsed_html)
     elif names[0] == '(VO) Analysis für Informatik':
         etest = parse_afi(parsed_html)
+    elif names[0] == 'FoSAP25':
+        etest = parse_fosap(parsed_html)
     elif names[0] == '(VU) Einführung in die Technische Informatik':
         etest = parse_ti(parsed_html)
     elif names[0] == '(UE) Lineare Algebra für Informatik (Tutorien)':
