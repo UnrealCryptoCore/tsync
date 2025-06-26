@@ -213,18 +213,18 @@ def create_app():
         db.cursor().execute("DELETE FROM answer WHERE user_id=? AND tid=?", (user_id, tid))
         db.commit()
 
-    def save_top_question(user_id, tid, tq: [test_parser.TopQuestion]):
+    def save_top_question(user_id, tid, tqs: [test_parser.TopQuestion]):
         db = get_db()
         res = db.cursor().execute(
-            "SELECT id FROM top_question WHERE tid=? AND question=?", (tid, tq.h))
+            "SELECT id FROM top_question WHERE tid=? AND question=?", (tid, tqs.h))
         id = res.fetchone()
         if id is None:
             id = str(uuid.uuid4())
             db.cursor().execute(
-                "INSERT INTO top_question (id, tid, user_id, question, html_question) VALUES (?, ?, ?, ?, ?)", (id, tid, user_id, tq.h, tq.html_h))
+                "INSERT INTO top_question (id, tid, user_id, question, html_question) VALUES (?, ?, ?, ?, ?)", (id, tid, user_id, tqs.h, tqs.html_h))
         else:
             id = id[0]
-        for q in tq.q:
+        for q in tqs.q:
             res = db.cursor().execute(
                 "SELECT id FROM question WHERE topid=? AND question=?", (id, q.q))
             res = res.fetchone()

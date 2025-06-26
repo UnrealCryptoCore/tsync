@@ -225,7 +225,8 @@ def parse_ds_la(phtml):
                 ctq = TopQuestion(text, contents, [])
                 tq.append(ctq)
             elif 'question' in td['class']:
-                cq = Question(text, contents, None)
+                cq = Question(text, contents, Answer(None, ac))
+                ac += 1
                 ctq.q.append(cq)
             elif 'answers' in td['class']:
                 inps = td.findAll('input', attrs={'type': 'radio'})
@@ -238,7 +239,6 @@ def parse_ds_la(phtml):
                                 cq.a = label.get_text()
                     else:
                         ans = inps[0].get('value')
-                        cq.a = ans
                         cq.a = Answer(ans, ac)
                         ac += 1
                 else:
