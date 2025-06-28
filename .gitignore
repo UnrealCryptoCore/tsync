@@ -15,6 +15,7 @@ build/
 
 .env
 tsync.db
+resourcelinks.txt
 data/
 
 .vscode/

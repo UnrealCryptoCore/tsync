@@ -4,10 +4,9 @@
 <h1>Resources</h1>
 <div>
     <ul>
-        <li><a href="/resources/afi/script">Skript Analysis</a></li>
-        <li><a href="/resources/ds/script">Skript Diskrete Strukturen</a></li>
-        <li><a href="https://www.falstad.com/circuit/">Circuit Simulator</a></li>
-        <li><a href="https://logic.ly/">Online logic gate simulator</a></li>
+        {% for link, name in res_links %}
+            <li><a href="{{ link }}">{{ name }}</a></li>
+        {% endfor %}
     </ul>
 </div>
 {% endblock %}

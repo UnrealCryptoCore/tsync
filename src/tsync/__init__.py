@@ -8,16 +8,22 @@ import sys
 import secrets
 
 
-class User:
-    def __init__(self, id, username):
-        self.id = id
-        self.username = username
+def load_resource_links():
+    try:
+        lines = open("resourcelinks.txt").readlines()
+        links = [line.split("=") for line in lines]
+        links = [(link[0].strip(), link[1].strip()) for link in links]
+        print(links)
+        return links
+    except FileNotFoundError:
+        return []
 
 
 def create_app():
     from . import test_parser
 
     load_dotenv()
+    res_links = load_resource_links()
 
     salt = os.getenv("SALT").encode("utf-8")
     DATABASE = 'tsync.db'
@@ -45,7 +51,7 @@ def create_app():
 
     @app.get("/resources")
     def resources():
-        return render_template("resourcestmpl.html")
+        return render_template("resourcestmpl.html", res_links=res_links)
 
     @app.get("/tampermonkey")
     def tamper_monkey():
