@@ -242,7 +242,7 @@ def create_app():
 
         db.commit()
 
-    def handle_upload(content: str):
+    def handle_upload(content: str, user_id: str):
         try:
             etest = test_parser.parse_test(content)
         except Exception:
@@ -252,18 +252,18 @@ def create_app():
         id = get_test_by_path(etest.ttype, etest.name, mktest)
         if id is None:
             return None, ("Test does not exist", 403)
-        user_id = session["id"]
         for tq in etest.q:
             save_top_question(user_id, id, tq)
         return id, None
 
     @app.post('/upload')
     def upload_file():
-        if "username" not in session:
+        if "id" not in session:
             return redirect("/login")
+        user_id = session["id"]
         f = request.files['file']
         content = f.read()
-        id, err = handle_upload(content)
+        id, err = handle_upload(content, user_id)
         if err:
             flash(err[0], 'error')
             return render_template("indextmpl.html"), err[1]
@@ -295,8 +295,9 @@ def create_app():
         res = res.fetchone()
         if res is None:
             return "Unauthorized: Invalid API Key", 401
+        user_id = res[0]
         content = request.get_data()
-        id, err = handle_upload(content)
+        id, err = handle_upload(content, user_id)
         if err:
             return err
         return jsonify({"testid": id}), 200
