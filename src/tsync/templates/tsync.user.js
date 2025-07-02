@@ -22,7 +22,16 @@
     let inps = document.getElementById('responseform').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
 
     function updateInputs() {
-        inps.forEach(inp => inp.setAttribute('value', inp.value));
+        inps.forEach(inp => {
+            inp.setAttribute('value', inp.value);
+            if (inp.getAttribute("type") == "checkbox") {
+                if (inp.checked) {
+                    inp.setAttribute('checked', 'checked');
+                } else {
+                    inp.removeAttribute('checked');
+                }
+            }
+        });
     }
 
     function tsync() {
