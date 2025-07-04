@@ -1,32 +1,49 @@
-from flask import Flask, redirect, render_template, request, session, g, flash, jsonify
-from dotenv import load_dotenv
-import sqlite3
-import bcrypt
 import os
-import uuid
-import sys
-import secrets
+from flask import Flask
+from dotenv import load_dotenv
 
+
+def load_resource_links():
+    """
+    Loads links for page /resources
+    Format: {link}={name}
+    """
+
+    try:
+        lines = open("resourcelinks.txt").readlines()
+        links = [line.split("=") for line in lines]
+        links = [(link[0].strip(), link[1].strip()) for link in links]
+        print(links)
+        return links
+    except FileNotFoundError:
+        return []
 
 
 def create_app():
     """
     creates the flask server
     """
-    from . import test_parser
 
     load_dotenv()
 
-    #from app import app
-    #from . import app
-    from .app import app
+    app = Flask(__name__, instance_relative_config=True)
+    app.config.from_mapping(
+        SECRET_KEY=os.getenv("SECRET").encode("utf-8"),
+        DATABASE="tsync.db",
+        PEPPER=os.getenv("PEPPER").encode("utf-8"),
+        URL=os.getenv("URL", "localhost"),
+        RESOURCE_LINKS=load_resource_links(),
+        UPLOAD_FOLDER="./data/",
+    )
+
+    from . import db
+    db.init_app(app)
+
+    from . import auth
+    from . import tsync
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(tsync.bp)
+
+    app.add_url_rule('/', endpoint='index')
 
     return app
-
-
-if __name__ == "__main__":
-    app = create_app()
-    if len(sys.argv) == 2 and sys.argv[1] == 'release':
-        app.run(host='0.0.0.0', port=25566)
-    else:
-        app.run(debug=True)
