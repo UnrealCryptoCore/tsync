@@ -11,7 +11,6 @@ from flask import (
     url_for,
     current_app,
 )
-from werkzeug.security import check_password_hash, generate_password_hash
 
 from tsync.db import get_db
 
@@ -50,9 +49,8 @@ def account():
 
 
 @bp.post("/resetpass")
+@login_required
 def reset_pass():
-    if 'id' not in session:
-        return redirect("/login")
     id = session['id']
     op = request.form['opass']
     np = request.form['npass']
@@ -76,10 +74,8 @@ def reset_pass():
 
 
 @bp.post("/apikey-create")
+@login_required
 def make_apikey():
-    if 'id' not in session:
-        return redirect("/login")
-
     id = session['id']
     key = secrets.token_urlsafe(32)
 
@@ -90,10 +86,8 @@ def make_apikey():
 
 
 @bp.post("/apikey-delete")
+@login_required
 def delete_apikey():
-    if 'id' not in session:
-        return redirect("/login")
-
     id = session['id']
     db = get_db()
     db.cursor().execute("UPDATE user SET api_key=NULL WHERE id=?", (id,))

@@ -24,7 +24,8 @@
     function updateInputs() {
         inps.forEach(inp => {
             inp.setAttribute('value', inp.value);
-            if (inp.getAttribute("type") == "checkbox") {
+            if (inp.getAttribute("type") == "checkbox" || inp.getAttribute("type") == "radio") {
+                inp.setAttribute('value', inp.checked ? "1" : "0");
                 if (inp.checked) {
                     inp.setAttribute('checked', 'checked');
                 } else {

@@ -1,3 +1,4 @@
+import uuid
 from flask import (
     Blueprint,
     flash,
@@ -204,14 +205,12 @@ def resources():
 
 
 @bp.get("/tampermonkey")
-def tamper_monkey():
+def tampermonkey():
     return render_template("tampermonkeytmpl.html")
 
 
 @bp.route("/")
 @login_required
 def index():
-    if "username" not in session:
-        return redirect("/login")
     hist = get_history()
     return render_template("indextmpl.html", hist=hist)
