@@ -3,7 +3,7 @@
 // @namespace    http://tampermonkey.net/
 // @version      2025-06-19
 // @description  Convinient way to upload files to tsync
-// @author       You
+// @author       CryptoCore
 // @match        https://moodle.rwth-aachen.de/mod/quiz/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=rwth-aachen.de
 // @grant        GM_xmlhttpRequest
@@ -35,7 +35,7 @@
         });
     }
 
-    function tsync() {
+    function uploadPage() {
         if (!apiKey) {
             error.textContent = "No api key specified.";
         }
@@ -55,8 +55,7 @@
                     if (!autoUpdate) {
                         info.textContent = "everything up to date";
                     }
-                }
-                else {
+                } else {
                     error.textContent = "Failed to upload test: " + response.statusText;
                 }
             },
@@ -64,6 +63,42 @@
                 error.textContent = "Failed to upload test.";
             }
         });
+    }
+
+    function getCMID() {
+        return new URL(location.href).searchParams.get('cmid');
+    }
+
+    function downloadSolutions() {
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: url + `/api/download/${getCMID()}`,
+            headers: {
+                "Content-Type": "application/text",
+                "tsync-api-key": apiKey,
+            },
+            onload: function(response) {
+                if (response.status == 200) {
+                    showSolutions(response);
+                } else {
+                    error.textContent = "Failed to upload test: " + response.statusText;
+                }
+            },
+            onerror: function(error) {
+                error.textContent = "Failed to upload test.";
+            }
+        });
+    }
+
+    function showSolutions(solutions) {
+        for (let i=0; i<solutions.length; i++) {
+            const sol = solutions[i];
+            const inp = document.getElementById(sol.key);
+            const parent = inp.parentNode;
+            const solE = document.createElement('div');
+            solE.textContent = sol.value;
+            parent.appendChild(solE);
+        }
     }
 
     function updateApiKey() {
@@ -85,7 +120,7 @@
             let newLastUpdate = Date.now();
             setTimeout(() => {
                 if (Date.now() - lastUpdate > 1000) {
-                    tsync();
+                    uploadPage();
                 }
             }, 1200);
 
@@ -110,9 +145,14 @@
     box.appendChild(title);
 
     const updateBtn = document.createElement('button');
-    updateBtn.textContent = "Update tsync test";
-    updateBtn.addEventListener('click', tsync);
+    updateBtn.textContent = "Upload";
+    updateBtn.addEventListener('click', uploadPage);
     box.appendChild(updateBtn);
+
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = "Download";
+    downloadBtn.addEventListener('click', downloadSolutions);
+    box.appendChild(downloadBtn);
 
     const keyBtn = document.createElement('button');
     keyBtn.textContent = "API Key";
