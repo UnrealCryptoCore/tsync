@@ -19,7 +19,7 @@
     let autoUpdate = await GM_getValue("autoUpdate", false);
     let lastUpdate = 0;
 
-    let inps = document.getElementById('responseform').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
+    let inps = document.querySelector('form').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
 
     function updateInputs() {
         inps.forEach(inp => {
@@ -54,6 +54,7 @@
                 if (response.status == 200) {
                     if (!autoUpdate) {
                         info.textContent = "everything up to date";
+                        error.textContent = "";
                     }
                 } else {
                     error.textContent = "Failed to upload test: " + response.statusText;
@@ -72,14 +73,15 @@
     function downloadSolutions() {
         GM_xmlhttpRequest({
             method: "GET",
-            url: url + `/api/download/${getCMID()}`,
+            url: url + `/api/solutions/${getCMID()}`,
             headers: {
                 "Content-Type": "application/text",
                 "tsync-api-key": apiKey,
             },
             onload: function(response) {
                 if (response.status == 200) {
-                    showSolutions(response);
+                    console.log(response.responseText);
+                    showSolutions(JSON.parse(response.responseText));
                 } else {
                     error.textContent = "Failed to upload test: " + response.statusText;
                 }
@@ -91,12 +93,11 @@
     }
 
     function showSolutions(solutions) {
-        for (let i=0; i<solutions.length; i++) {
-            const sol = solutions[i];
-            const inp = document.getElementById(sol.key);
+        for (const key in solutions) {
+            const inp = document.getElementById(key);
             const parent = inp.parentNode;
             const solE = document.createElement('div');
-            solE.textContent = sol.value;
+            solE.textContent = solutions[key];
             parent.appendChild(solE);
         }
     }
