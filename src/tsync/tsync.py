@@ -1,4 +1,3 @@
-import uuid
 from flask import (
     Blueprint,
     flash,
@@ -7,161 +6,130 @@ from flask import (
     request,
     current_app,
     session,
-    jsonify
+    jsonify,
+    g,
 )
-from .auth import login_required
+from markupsafe import Markup
+from .auth import login_required, api_key_required
 from .db import get_db
-from .test_parser import (
-    ETest, Question, TopQuestion, Answer, parse_test
+from .test_parserv2 import (
+    parse_test as parse_testv2,
+    ETest as Etestv2,
+    Answer as Answer_v2,
 )
 
 bp = Blueprint("tsync", __name__)
 
 
-def get_etest(id, user_id) -> ETest:
-    db = get_db()
-    res = db.cursor().execute("SELECT ttype, name FROM etest WHERE id=?", (id,))
-    testpath = res.fetchone()
-    if testpath is None:
-        return None
-    res = db.cursor().execute(
-        "SELECT id, question, html_question FROM top_question WHERE tid=?", (id,))
-    tqs = res.fetchall()
-    topqs = []
-    test = ETest(testpath[0], testpath[1], topqs)
-    for tq in tqs:
-        topq = TopQuestion(tq[1], tq[2], [])
-        res = db.cursor().execute(
-            "SELECT question, html_question, answer, answer.sort_id, question.id FROM question, answer WHERE answer.q_id=question.id AND topid=? AND answer.user_id=?", (tq[0], user_id))
-        qs = res.fetchall()
-        questions = []
-        for q in qs:
-            quest = Question(
-                q[0], q[1], Answer(q[2], q[3]))
-            questions.append(quest)
-            res = db.cursor().execute(
-                "SELECT answer, user.username FROM answer, user WHERE user_id!=? AND user.id=answer.user_id AND answer.tid=? AND answer.q_id=?", (user_id, id, q[4]))
-            others = res.fetchall()
-            quest.others = {}
-            for other in others:
-                if other[0] in quest.others:
-                    quest.others[other[0]].append(other[1])
-                else:
-                    quest.others[other[0]] = [other[1]]
-
-        topq.q = questions
-        topqs.append(topq)
-    test.sort()
-    return test
-
-
-def get_test_by_path(ttype, name, mktest):
+def get_etest_v2(cmid, user_id):
     db = get_db()
     res = db.cursor().execute(
-        "SELECT id FROM etest WHERE ttype=? AND name=?", (ttype, name))
-
-    test = res.fetchone()
-    if test is None and mktest:
-        id = str(uuid.uuid4())
+        "SELECT name, html FROM etest_v2 WHERE cmid=? AND user_id=?", (cmid, user_id))
+    etest = res.fetchone()
+    if etest is None:
+        return None, None
+    etest = Etestv2(cmid, etest[0], [], etest[1])
+    res = db.cursor().execute(
+        "SELECT id, hash, value FROM answer_v2 WHERE cmid=? AND user_id=?", (cmid, user_id))
+    answers = res.fetchall()
+    groups = []
+    for i, ans in enumerate(answers):
+        ans = Answer_v2(ans[0], ans[2], text_hash=ans[1])
+        answers[i] = ans
         res = db.cursor().execute(
-            "INSERT INTO etest (id, ttype, name) VALUES (?, ?, ?)", (id, ttype, name))
-        db.commit()
-        test = id
-    else:
-        test = test[0]
-    return test
+            """
+            SELECT
+                answer_v2.value, user.username
+            FROM
+                answer_v2, user
+            WHERE
+                answer_v2.hash=?
+                AND user.id=answer_v2.user_id
+            """,
+            (ans.hash, ))
+        res = res.fetchall()
+        group = {
+            ans.value: []
+        }
+        for v in res:
+            if v[0] in group:
+                group[v[0]].append(v[1])
+            else:
+                group[v[0]] = [v[1]]
+        groups.append(group)
+    etest.answers = answers
+    return etest, groups
 
 
-def clear_questions(user_id, tid):
+def save_etest(user_id, etest):
     db = get_db()
-    db.cursor().execute("DELETE FROM answer WHERE user_id=? AND tid=?", (user_id, tid))
+    db.cursor().execute("INSERT into etest_v2 (user_id, cmid, name, html) VALUES (?, ?, ?, ?)",
+                        (user_id, etest.cmid, etest.name, etest.html))
+    for quest in etest.answers:
+        db.cursor().execute("INSERT into answer_v2 (cmid, id, user_id, hash, value) VALUES (?, ?, ?, ?, ?)",
+                            (etest.cmid, quest.id, user_id, quest.hash, quest.value))
     db.commit()
 
 
-def save_top_question(user_id, tid, tqs: [TopQuestion]):
-    db = get_db()
-    res = db.cursor().execute(
-        "SELECT id FROM top_question WHERE tid=? AND question=?", (tid, tqs.h))
-    id = res.fetchone()
-    if id is None:
-        id = str(uuid.uuid4())
-        db.cursor().execute(
-            "INSERT INTO top_question (id, tid, user_id, question, html_question) VALUES (?, ?, ?, ?, ?)", (id, tid, user_id, tqs.h, tqs.html_h))
-    else:
-        id = id[0]
-    for q in tqs.q:
-        res = db.cursor().execute(
-            "SELECT id FROM question WHERE topid=? AND question=?", (id, q.q))
-        res = res.fetchone()
-        if res is None:
-            qid = str(uuid.uuid4())
-            db.cursor().execute(
-                "INSERT INTO question (id, topid, user_id, question, html_question) VALUES (?, ?, ?, ?, ?)", (qid, id, user_id, q.q, q.html_q))
-        else:
-            qid = res[0]
-            db.cursor().execute(
-                "DELETE FROM answer WHERE tid=? AND q_id=? AND user_id=?", (tid, qid, user_id))
-        aid = str(uuid.uuid4())
-        db.cursor().execute(
-            "INSERT INTO answer (id, tid, q_id, user_id, answer, sort_id) VALUES (?, ?, ?, ?, ?, ?)", (aid, tid, qid, user_id, q.a.val, q.a.sortId))
-
-    db.commit()
+def backup_test(etest, content):
+    pass
 
 
-def handle_upload(content: str, user_id: str):
+def handle_upload_v2(content: str, user_id: str):
     try:
-        etest = parse_test(content)
+        etest = parse_testv2(content)
     except Exception:
-        return None, ("Input file is invalid", 400)
-    # mktest = 'admin' in session and session['admin']
-    mktest = True
-    id = get_test_by_path(etest.ttype, etest.name, mktest)
-    if id is None:
-        return None, ("Test does not exist", 403)
-    for tq in etest.q:
-        save_top_question(user_id, id, tq)
-    return id, None
+        return None, ("Input file is invalid.", 400)
+    save_etest(user_id, etest)
+    backup_test(etest, content)
+    return etest.cmid, None
 
 
-def get_history():
+def get_history(user_id):
     db = get_db()
-    res = db.cursor().execute("SELECT id, name, ttype FROM etest")
+    res = db.cursor().execute(
+        "SELECT cmid, name FROM etest_v2 WHERE user_id=?", (user_id, ))
     res = res.fetchall()
 
-    modules = {
-        'afi': [],
-        'ds': [],
-        'ti': [],
-        'la': [],
-        'fosap': []}
+    return res
 
-    for (id, name, ttype) in res:
-        modules[ttype].append((id, name, ttype))
 
-    return modules
+def answer_to_html(ans, group):
+    s = ""
+    for v in group:
+        if ans.value == v:
+            if len(group[v]) == 1:
+                tp = "answer-unknown"
+            else:
+                tp = "answer-same"
+        else:
+            tp = "answer-different"
+        s += f"<div class='{tp}'>{v}: {", ".join(group[v])}</div>"
+    return s
 
 
 @bp.get("/test/<testid>")
 @login_required
 def test_page(testid):
-    if 'id' not in session:
-        return render_template("testnotfoundtmpl.html"), 401
     user_id = session['id']
-    test = get_etest(testid, user_id)
+    test, groups = get_etest_v2(testid, user_id)
     if test is None:
         return render_template("testnotfoundtmpl.html"), 404
-    return render_template("testtmpl.html", test=test, enumerate=enumerate)
+    render = test.html
+    for ans, group in zip(test.answers, groups):
+        s = answer_to_html(ans, group)
+        render = render.replace(f"%{ans.id.upper()}%", s)
+    render = Markup(render)
+    return render_template("testtmpl_v2.html", name=test.name, test_render=render)
 
 
 @bp.post('/upload')
 @login_required
 def upload_file():
-    # if "id" not in session:
-    # return redirect("/login")
     user_id = session["id"]
     f = request.files['file']
     content = f.read()
-    id, err = handle_upload(content, user_id)
+    id, err = handle_upload_v2(content, user_id)
     if err:
         flash(err[0], 'error')
         return render_template("indextmpl.html"), err[1]
@@ -169,20 +137,28 @@ def upload_file():
 
 
 @bp.post("/api/upload")
+@api_key_required
 def api_upload():
-    key = request.headers.get("tsync-api-key")
-    db = get_db()
-
-    res = db.cursor().execute("SELECT id FROM user WHERE api_key=?", (key,))
-    res = res.fetchone()
-    if res is None:
-        return "Unauthorized: Invalid API Key", 401
-    user_id = res[0]
+    user_id = g.user_id
     content = request.get_data()
-    id, err = handle_upload(content, user_id)
+    id, err = handle_upload_v2(content, user_id)
     if err:
         return err
     return jsonify({"testid": id}), 200
+
+
+@bp.get("/api/solutions/<cmid>")
+@api_key_required
+def api_solutions(cmid):
+    user_id = g.user_id
+    test, groups = get_etest_v2(cmid, user_id)
+    if test is None:
+        return None, 404
+
+    res = {}
+    for ans, group in zip(test.answers, groups):
+        res[ans.id] = answer_to_html(ans, group)
+    return jsonify(res), 200
 
 
 @bp.get("/tsync.user.js")
@@ -212,5 +188,6 @@ def tampermonkey():
 @bp.route("/")
 @login_required
 def index():
-    hist = get_history()
+    user_id = session["id"]
+    hist = get_history(user_id)
     return render_template("indextmpl.html", hist=hist)

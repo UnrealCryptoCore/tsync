@@ -32,20 +32,13 @@
 </div>
 <div id="history">
     <h3>History</h3>
-
-    <table class="hist-table">
-        {% for ttype in hist %}
-        <tr class="hist-table-column">
-            <td class="hist-table-header">{{ttype}}</td>
-            {% for l in hist[ttype] %}
-            <td class="hist-item">
-                <a class="button-link" href="{{ '/test/'+l[0] }}" >{{ l[2] + ' - ' + l[1] }}</a>
-            </td>
-            {% endfor %}
-        </tr>
+    <ul>
+        {% for test in hist %}
+            <li class="hist-item">
+                <a class="button-link" href="{{ '/test/'+test[0] }}" >{{ test[1] }}</a>
+            </li>
         {% endfor %}
-
-    </table>
+    </ul>
 </div>
 
 <script src="/static/dad.js"></script>

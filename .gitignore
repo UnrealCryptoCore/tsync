@@ -17,6 +17,7 @@ build/
 tsync.db
 resourcelinks.txt
 data/
+src/tsync/test_test_parser.py
 
 .vscode/
 .idea/

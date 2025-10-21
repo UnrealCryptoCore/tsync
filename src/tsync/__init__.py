@@ -13,7 +13,6 @@ def load_resource_links():
         lines = open("resourcelinks.txt").readlines()
         links = [line.split("=") for line in lines]
         links = [(link[0].strip(), link[1].strip()) for link in links]
-        print(links)
         return links
     except FileNotFoundError:
         return []

@@ -2,18 +2,21 @@ import bs4
 
 
 class Answer:
-    def __init__(self, id, text, value):
-        self.id = id
-        self.hash = hash(text)
-        self.value = value
+    def __init__(self, id, value, text=None, text_hash=None):
+        self.id: str = id
+        if text_hash is None:
+            self.hash: str = hash(text)
+        else:
+            self.hash = text_hash
+        self.value: str = value
 
 
 class ETest:
     def __init__(self, cmid, name, answers, html):
-        self.cmid = cmid
-        self.name = name
+        self.cmid: str = cmid
+        self.name: str = name
         self.answers: list[Answer] = answers
-        self.html = html
+        self.html: str = html
 
 
 def make_compatible(content):
@@ -84,7 +87,7 @@ def get_answer(soup, inp, text):
     others.string = f"%{id.upper()}%"
     inp.parent.append(others)
 
-    return Answer(id, text, value)
+    return Answer(id, value, text=text)
 
 
 def get_answers(soup, inps, text):
@@ -136,7 +139,7 @@ def parse_test(content: str) -> ETest:
     if form is None:
         return None
 
-    assists = form.findAll('span', attrs={'class': 'MJX_Assisitive_MathML'})
+    assists = form.findAll('span', attrs={'class': 'MJX_Assistive_MathML'})
     for a in assists:
         a.decompose()
 
@@ -166,4 +169,4 @@ def parse_test(content: str) -> ETest:
         answers.extend(parse_subquestions(soup, subques, text))
 
     answers = list(filter(lambda x: x is not None, answers))
-    return ETest(cmid, name, answers, form)
+    return ETest(cmid, name, answers, str(form))

@@ -10,6 +10,7 @@ from flask import (
     session,
     url_for,
     current_app,
+    g,
 )
 
 from tsync.db import get_db
@@ -18,12 +19,26 @@ bp = Blueprint('auth', __name__)
 
 
 def login_required(view):
-    """View decorator that redirects anonymous users to the login page."""
-
     @functools.wraps(view)
     def wrapped_view(**kwargs):
         if 'id' not in session:
             return redirect(url_for("auth.login"))
+
+        return view(**kwargs)
+
+    return wrapped_view
+
+
+def api_key_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        key = request.headers.get("tsync-api-key")
+        db = get_db()
+        res = db.cursor().execute("SELECT id FROM user WHERE api_key=?", (key,))
+        res = res.fetchone()
+        if res is None:
+            return "Unauthorized: Invalid API Key", 401
+        g.user_id = res[0]
 
         return view(**kwargs)
 
@@ -111,7 +126,8 @@ def logout():
 def p_login():
     username = request.form['username']
     password = request.form['password']
-    hash = bcrypt.hashpw(password.encode("utf-8"), current_app.config['PEPPER'])
+    hash = bcrypt.hashpw(password.encode("utf-8"),
+                         current_app.config['PEPPER'])
     res = get_db().cursor().execute(
         "SELECT id, username, admin FROM user WHERE username=? AND passhash=?", (username, hash,))
     user = res.fetchone()
