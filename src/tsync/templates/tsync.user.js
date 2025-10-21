@@ -9,6 +9,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @grant        GM_addStyle
 // ==/UserScript==
 
 (async function() {
@@ -97,7 +98,7 @@
             const inp = document.getElementById(key);
             const parent = inp.parentNode;
             const solE = document.createElement('div');
-            solE.textContent = solutions[key];
+            solE.innerHTML = solutions[key];
             parent.appendChild(solE);
         }
     }
@@ -131,37 +132,60 @@
         }
     }
 
+    GM_addStyle(`
+        .tsync-main-box {
+            z-index: 9999;
+            position: fixed;
+            bottom: 1rem;
+            left: 1rem;
+            background-color: #3c3c3c;
+            padding: 0.5rem;
+            border-radius: 0.3rem;
+            color: white;
+            box-shadow: 5px 5px 5px black;
+        }
+
+        .tsync-btn {
+            background-color: #3a7cff;
+            border-radius: 0.4rem;
+            border-style: hidden;
+            margin: 0.3rem;
+            display: block;
+            width: 12rem;
+            color: white;
+        }
+    `);
+
     // ui
     const box = document.createElement('div');
-    box.style.zIndex = 9999;
-    box.style.position = 'fixed';
-    box.style.bottom = '1rem';
-    box.style.left = '1rem';
-    box.style.backgroundColor = '#777';
-    box.style.padding = '0.5rem';
-    box.style.borderRadius = '0.3rem';
-
+    box.classList.add('tsync-main-box');
     const title = document.createElement('h3');
     title.textContent = "Tsync";
     box.appendChild(title);
 
+    //const btnRow = document.createElement('div');
+
     const updateBtn = document.createElement('button');
     updateBtn.textContent = "Upload";
+    updateBtn.classList.add('tsync-btn');
     updateBtn.addEventListener('click', uploadPage);
     box.appendChild(updateBtn);
 
-    const downloadBtn = document.createElement('button');
-    downloadBtn.textContent = "Download";
-    downloadBtn.addEventListener('click', downloadSolutions);
-    box.appendChild(downloadBtn);
-
     const keyBtn = document.createElement('button');
     keyBtn.textContent = "API Key";
+    keyBtn.classList.add('tsync-btn');
     keyBtn.addEventListener('click', updateApiKey);
     box.appendChild(keyBtn);
 
+    const downloadBtn = document.createElement('button');
+    downloadBtn.textContent = "Show Solution";
+    downloadBtn.classList.add('tsync-btn');
+    downloadBtn.addEventListener('click', downloadSolutions);
+    box.appendChild(downloadBtn);
+
+
     const updateBox = document.createElement('div');
-    updateBox.innerHTML = '<span>auto update</span>';
+    updateBox.innerHTML = '<span>auto upload</span>';
     updateBox.style.display = 'flex';
     updateBox.style.justifyContent = 'space-between';
     updateBox.addEventListener('click', updateAutoUpdate);

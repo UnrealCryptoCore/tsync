@@ -1,0 +1,222 @@
+.que {
+    text-align: left;
+    margin: 0 auto 1.8em auto;
+    display: flex;
+    align-items: start;
+    gap: 1rem;
+}
+
+
+.que .info {
+    flex-shrink: 0;
+    width: 7em;
+    padding: 0.5em;
+    background-color: #f8f9fa;
+    border: 1px solid #cad0d7;
+    border-radius: 2px;
+}
+
+
+.que .formulation,
+.que .outcome,
+.que .comment {
+    position: relative;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1rem;
+    border: 0 solid transparent;
+    border-radius: 0.5rem;
+}
+
+.que .outcome,
+.que .comment {
+    color: #916300;
+    background-color: #fdeecc;
+    border-color: #fce5b3;
+    /* stylelint-disable-line max-line-length */
+}
+
+.que .outcome hr,
+.que .comment hr {
+    border-top-color: #fbdd9a;
+}
+
+.que .outcome .alert-link,
+.que .comment .alert-link {
+    color: #5e4000;
+}
+
+.que .outcome a,
+.que .comment a {
+    color: #000306;
+}
+
+.que .formulation {
+    color: black;
+    background-color: #ccc;
+    border-color: #b3b3b3;
+    /* stylelint-disable-line max-line-length */
+}
+
+.que .formulation hr {
+    border-top-color: #a6a6a6;
+}
+
+.que .formulation .alert-link {
+    color: black;
+}
+
+.que.multichoice .answer div.r0 .icon.fa-check,
+.que.multichoice .answer div.r1 .icon.fa-check,
+.que.multichoice .answer div.r0 .icon.fa-remove,
+.que.multichoice .answer div.r1 .icon.fa-remove {
+    text-indent: 0;
+}
+
+.formulation input[type="text"],
+.formulation select {
+    width: auto;
+    vertical-align: baseline;
+}
+
+.que.multianswer .formulation .yui3-widget-positioned {
+    box-sizing: content-box;
+}
+
+.que.multianswer .formulation .yui3-widget-positioned .feedbackspan {
+    width: inherit;
+    max-width: inherit;
+}
+
+.que input[size],
+.que textarea[cols] {
+    width: auto;
+    max-width: 100%;
+}
+
+.que .comment {
+    color: #21410f;
+    background-color: #d9e6d2;
+    border-color: #c6d9bb;
+    /* stylelint-disable-line max-line-length */
+}
+
+.que .comment hr {
+    border-top-color: #b8d0ab;
+}
+
+.que .comment .alert-link {
+    color: #0c1805;
+}
+
+.que .ablock {
+    margin: 0.7em 0 0.3em 0;
+}
+
+.que .im-controls {
+    margin-top: 0.5em;
+    text-align: left;
+}
+
+.que .specificfeedback,
+.que .generalfeedback,
+.que .numpartscorrect .que .rightanswer,
+.que .im-feedback,
+.que .feedback,
+.que p {
+    margin: 0 0 0.5em;
+}
+
+.que .correctness.correct {
+    color: #fff;
+    background-color: #42811D;
+}
+
+a.que .correctness.correct:hover,
+a.que .correctness.correct:focus {
+    color: #fff;
+    background-color: #2d5714;
+}
+
+a.que .correctness.correct:focus,
+a.que .correctness.correct.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(66, 129, 29, 0.5);
+}
+
+.que .correctness.partiallycorrect {
+    color: #1d2125;
+    background-color: #F6A800;
+}
+
+a.que .correctness.partiallycorrect:hover,
+a.que .correctness.partiallycorrect:focus {
+    color: #1d2125;
+    background-color: #c38500;
+}
+
+a.que .correctness.partiallycorrect:focus,
+a.que .correctness.partiallycorrect.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(246, 168, 0, 0.5);
+}
+
+.que .correctness.notanswered,
+.que .correctness.incorrect {
+    color: #fff;
+    background-color: #CC071E;
+}
+
+a.que .correctness.notanswered:hover,
+a.que .correctness.incorrect:hover,
+a.que .correctness.notanswered:focus,
+a.que .correctness.incorrect:focus {
+    color: #fff;
+    background-color: #9b0517;
+}
+
+a.que .correctness.notanswered:focus,
+a.que .correctness.incorrect:focus,
+a.que .correctness.notanswered.focus,
+a.que .correctness.incorrect.focus {
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(204, 7, 30, 0.5);
+}
+
+.que .qtext {
+    margin-bottom: 1.5em;
+}
+
+.que .validationerror {
+    color: #CC071E;
+}
+
+.que .grading,
+.que .comment,
+.que .commentlink,
+.que .history {
+    margin-top: 0.5em;
+}
+
+.que .history h3 {
+    margin: 0 0 0.2em;
+    font-size: 1em;
+}
+
+.que .history table {
+    width: 100%;
+    margin: 0;
+}
+
+.que .history .current {
+    font-weight: bold;
+}
+
+.que .questioncorrectnessicon {
+    vertical-align: text-bottom;
+}
+
+.que .questionflagimage {
+    padding-right: 3px;
+    height: 16px;
+    width: 16px;
+}

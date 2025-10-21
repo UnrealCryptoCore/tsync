@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-salt = os.getenv('PEPPER').encode("utf-8")
+pepper = os.getenv('PEPPER').encode("utf-8")
 
 
 def main():
@@ -50,15 +50,6 @@ def setup_db():
         "CREATE TABLE user(id CHAR(36), username VARCHAR(63), passhash CHAR(60), admin BOOL, api_key CHAR(32))")
 
     cur.execute(
-        "CREATE TABLE etest(id CHAR(36), ttype VARCHAR(255), name VARCHAR(255))")
-    cur.execute(
-        "CREATE TABLE top_question(id CHAR(36), tid CHAR(36), user_id VARCHAR(63), question VARCHAR(1024), html_question VARCHAR(2048))")
-    cur.execute(
-        "CREATE TABLE question(id CHAR(36), topid CHAR(36), user_id CHAR(36), question VARCHAR(1024),html_question TEXT)")
-    cur.execute(
-        "CREATE TABLE answer(id CHAR(36), tid CHAR(36), q_id CHAR(36), user_id CHAR(36), answer VARCHAR(512), sort_id INTEGER)")
-
-    cur.execute(
         "CREATE TABLE answer_v2(cmid VARCHAR(255), id VARCHAR(255), user_id CHAR(36), hash INTEGER, value VARCHAR(255))")
 
     cur.execute(
@@ -73,7 +64,7 @@ def add_user(username, password, admin=False):
     cur = con.cursor()
 
     id = str(uuid.uuid4())
-    hash = bcrypt.hashpw(password.encode("utf-8"), salt)
+    hash = bcrypt.hashpw(password.encode("utf-8"), pepper)
     cur.execute("INSERT INTO user (id, username, passhash, admin) VALUES (?, ?, ?, ?)",
                 (id, username, hash, admin))
     con.commit()
