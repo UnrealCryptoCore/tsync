@@ -79,7 +79,8 @@ def save_etest(user_id, etest):
                             INSERT into answer_v2
                                 (cmid, id, user_id, hash, value)
                             VALUES (?, ?, ?, ?, ?)
-                            ON CONFLICT(cmid, id) SET
+                            ON CONFLICT(cmid, id)
+                            DO UPDATE SET
                                 value = excluded.value
                             """,
                             (etest.cmid, quest.id, user_id, quest.hash, quest.value))
@@ -87,11 +88,11 @@ def save_etest(user_id, etest):
 
 
 def backup_test(etest, content, user_id):
-    now = datetime.datetime().now()
-    filename = f"uploads/{user_id}/{now.strftime("%d-%M-%Y")}/test-{
+    now = datetime.date.today()
+    filename = f"uploads/{user_id}/{now.strftime("%d-%m-%Y")}/test-{
         etest.cmid}.html"
     os.makedirs(os.path.dirname(filename), exist_ok=True)
-    with open(filename, "w") as f:
+    with open(filename, "wb") as f:
         f.write(content)
 
 
@@ -101,7 +102,8 @@ def handle_upload_v2(content: str, user_id: str):
     except Exception:
         return None, ("Input file is invalid.", 400)
     save_etest(user_id, etest)
-    backup_test(etest, content)
+    if False:
+        backup_test(etest, content, user_id)
     return etest.cmid, None
 
 

@@ -54,7 +54,7 @@
             onload: function(response) {
                 if (response.status == 200) {
                     if (!autoUpdate) {
-                        info.textContent = "everything up to date";
+                        info.textContent = "Uploaded test.";
                         error.textContent = "";
                     }
                 } else {
@@ -154,6 +154,13 @@
             width: 12rem;
             color: white;
         }
+
+        .tsync-btn:hover {
+        }
+
+        .text-box {
+            margin-inline: 1rem;
+        }
     `);
 
     // ui
@@ -163,19 +170,11 @@
     title.textContent = "Tsync";
     box.appendChild(title);
 
-    //const btnRow = document.createElement('div');
-
     const updateBtn = document.createElement('button');
     updateBtn.textContent = "Upload";
     updateBtn.classList.add('tsync-btn');
     updateBtn.addEventListener('click', uploadPage);
     box.appendChild(updateBtn);
-
-    const keyBtn = document.createElement('button');
-    keyBtn.textContent = "API Key";
-    keyBtn.classList.add('tsync-btn');
-    keyBtn.addEventListener('click', updateApiKey);
-    box.appendChild(keyBtn);
 
     const downloadBtn = document.createElement('button');
     downloadBtn.textContent = "Show Solution";
@@ -183,8 +182,17 @@
     downloadBtn.addEventListener('click', downloadSolutions);
     box.appendChild(downloadBtn);
 
+    const keyBtn = document.createElement('button');
+    keyBtn.textContent = "API Key";
+    keyBtn.classList.add('tsync-btn');
+    keyBtn.addEventListener('click', updateApiKey);
+    box.appendChild(keyBtn);
+
+    const textBox = document.createElement('div');
+    textBox.className = "text-box";
 
     const updateBox = document.createElement('div');
+    updateBox.className = "update-box";
     updateBox.innerHTML = '<span>auto upload</span>';
     updateBox.style.display = 'flex';
     updateBox.style.justifyContent = 'space-between';
@@ -195,17 +203,19 @@
     updateBoxCheck.checked = autoUpdate;
     updateBox.appendChild(updateBoxCheck);
 
-    box.appendChild(updateBox);
+    textBox.appendChild(updateBox);
 
 
     const info = document.createElement('div');
     info.textContent = "";
-    box.appendChild(info);
+    textBox.appendChild(info);
 
     const error = document.createElement('div');
     error.textContent = "";
     error.style.color = "red";
-    box.appendChild(error);
+    textBox.appendChild(error);
+
+    box.appendChild(textBox);
 
     document.body.appendChild(box);
 
