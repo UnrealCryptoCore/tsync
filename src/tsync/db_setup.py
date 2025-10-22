@@ -46,14 +46,34 @@ def setup_db():
     con = sqlite3.connect("tsync.db")
     cur = con.cursor()
 
-    cur.execute(
-        "CREATE TABLE user(id CHAR(36), username VARCHAR(63), passhash CHAR(60), admin BOOL, api_key CHAR(32))")
+    cur.execute("""
+        CREATE TABLE user(
+            id CHAR(36),
+            username VARCHAR(63),
+            passhash CHAR(60),
+            admin BOOL,
+            api_key CHAR(32),
+            PRIMARY KEY (id))
+        """)
 
-    cur.execute(
-        "CREATE TABLE answer_v2(cmid VARCHAR(255), id VARCHAR(255), user_id CHAR(36), hash INTEGER, value VARCHAR(255))")
+    cur.execute("""
+        CREATE TABLE answer_v2(
+            cmid VARCHAR(255),
+            id VARCHAR(255),
+            user_id CHAR(36),
+            hash INTEGER,
+            value VARCHAR(255),
+            PRIMARY KEY (cmid, id))
+        """)
 
-    cur.execute(
-        "CREATE TABLE etest_v2(cmid VARCHAR(255), user_id CHAR(36), name VARCHAR(255), html TEXT)")
+    cur.execute("""
+        CREATE TABLE etest_v2(
+            cmid VARCHAR(255),
+            user_id CHAR(36),
+            name VARCHAR(255),
+            html TEXT,
+            PRIMARY KEY (cmid, user_id))
+        """)
 
     add_user("admin", "admin", True)
     add_user("test", "test", False)
