@@ -1,3 +1,5 @@
+import datetime
+import os
 from flask import (
     Blueprint,
     flash,
@@ -63,16 +65,34 @@ def get_etest_v2(cmid, user_id):
 
 def save_etest(user_id, etest):
     db = get_db()
-    db.cursor().execute("INSERT into etest_v2 (user_id, cmid, name, html) VALUES (?, ?, ?, ?)",
+    db.cursor().execute("""
+                        INSERT into etest_v2
+                            (user_id, cmid, name, html)
+                        VALUES (?, ?, ?, ?)
+                        ON CONFLICT(cmid, user_id)
+                        DO UPDATE SET
+                            html = excluded.html
+                        """,
                         (user_id, etest.cmid, etest.name, etest.html))
     for quest in etest.answers:
-        db.cursor().execute("INSERT into answer_v2 (cmid, id, user_id, hash, value) VALUES (?, ?, ?, ?, ?)",
+        db.cursor().execute("""
+                            INSERT into answer_v2
+                                (cmid, id, user_id, hash, value)
+                            VALUES (?, ?, ?, ?, ?)
+                            ON CONFLICT(cmid, id) SET
+                                value = excluded.value
+                            """,
                             (etest.cmid, quest.id, user_id, quest.hash, quest.value))
     db.commit()
 
 
-def backup_test(etest, content):
-    pass
+def backup_test(etest, content, user_id):
+    now = datetime.datetime().now()
+    filename = f"uploads/{user_id}/{now.strftime("%d-%M-%Y")}/test-{
+        etest.cmid}.html"
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+    with open(filename, "w") as f:
+        f.write(content)
 
 
 def handle_upload_v2(content: str, user_id: str):
@@ -104,7 +124,7 @@ def answer_to_html(ans, group):
                 tp = "answer-same"
         else:
             tp = "answer-different"
-        s += f"<div class='{tp}'>{v}: {", ".join(group[v])}</div>"
+        s += f"<div class='{tp}'>{v}: {', '.join(group[v])}</div>"
     return s
 
 
