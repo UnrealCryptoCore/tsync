@@ -89,8 +89,7 @@ def save_etest(user_id, etest):
 
 def backup_test(etest, content, user_id):
     now = datetime.date.today()
-    filename = f"uploads/{user_id}/{now.strftime("%d-%m-%Y")}/test-{
-        etest.cmid}.html"
+    filename = f"uploads/{user_id}/{now.strftime('%d-%m-%Y')}/test-{etest.cmid}.html"
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, "wb") as f:
         f.write(content)
