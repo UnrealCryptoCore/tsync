@@ -18,6 +18,12 @@ def load_resource_links():
         return []
 
 
+def load_ai_user_id(db, username):
+    res = db.execute("SELECT id FROM user WHERE username=?", (username, ))
+    res = res.fetchone()
+    return res[0]
+
+
 def create_app():
     """
     creates the flask server
@@ -33,6 +39,7 @@ def create_app():
         URL=os.getenv("URL", "localhost"),
         RESOURCE_LINKS=load_resource_links(),
         UPLOAD_FOLDER="./data/",
+        AI_USERNAME=os.getenv("AI_USERNAME"),
     )
 
     from . import db
@@ -44,5 +51,7 @@ def create_app():
     app.register_blueprint(tsync.bp)
 
     app.add_url_rule('/', endpoint='index')
+    with app.app_context():
+        app.config['AI_USER_ID'] = load_ai_user_id(db.get_db(), app.config['AI_USERNAME'])
 
     return app

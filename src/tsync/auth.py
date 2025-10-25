@@ -129,13 +129,13 @@ def p_login():
     hash = bcrypt.hashpw(password.encode("utf-8"),
                          current_app.config['PEPPER'])
     res = get_db().cursor().execute(
-        "SELECT id, username, admin FROM user WHERE username=? AND passhash=?", (username, hash,))
+        "SELECT id, username, type FROM user WHERE username=? AND passhash=?", (username, hash,))
     user = res.fetchone()
     if user is None:
         return render_template("logintmpl.html", invalid=True)
     session["id"] = user[0]
     session["username"] = user[1]
-    session["admin"] = user[2]
+    session["type"] = user[2]
     return redirect("/")
 
 

@@ -1,0 +1,5 @@
+You are a reasoning assistant.
+
+Question:
+$question
+$answers

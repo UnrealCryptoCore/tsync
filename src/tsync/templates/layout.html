@@ -9,7 +9,7 @@
     {% endblock %}
 </head>
 
-<body style="margin: 0; padding: 0;">
+<body style="margin: 0; padding: 0;" class="root">
     <div class="header">
         <div style=" display: flex; justify-content: space-between; margin-bottom: 1rem; padding: 1rem;">
             <div>
@@ -25,7 +25,7 @@
             </div>
         </div>
     </div>
-    <div id="content" style="padding: 1rem;">{% block content %}{% endblock %}</div>
+    <div id="tsync-content" style="padding: 1rem;">{% block content %}{% endblock %}</div>
     <div id="footer">
         {% block footer %}
 

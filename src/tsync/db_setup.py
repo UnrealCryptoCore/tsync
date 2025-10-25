@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 pepper = os.getenv('PEPPER').encode("utf-8")
+ai_username = os.getenv('AI_USERNAME')
 
 
 def main():
@@ -49,9 +50,9 @@ def setup_db():
     cur.execute("""
         CREATE TABLE user(
             id CHAR(36),
-            username VARCHAR(63),
+            username VARCHAR(64),
             passhash CHAR(60),
-            admin BOOL,
+            type VARCHAR(16),
             api_key CHAR(32),
             PRIMARY KEY (id))
         """)
@@ -62,8 +63,17 @@ def setup_db():
             id VARCHAR(255),
             user_id CHAR(36),
             hash INTEGER,
+            text VARCHAR(255),
             value VARCHAR(255),
+            type VARCHAR(32),
             PRIMARY KEY (cmid, id))
+        """)
+
+    cur.execute("""
+        CREATE TABLE question_v2(
+            id INTEGER,
+            question TEXT,
+            PRIMARY KEY (id))
         """)
 
     cur.execute("""
@@ -75,18 +85,19 @@ def setup_db():
             PRIMARY KEY (cmid, user_id))
         """)
 
-    add_user("admin", "admin", True)
-    add_user("test", "test", False)
+    add_user("admin", "admin", "admin")
+    add_user("test", "test")
+    add_user(ai_username, ai_username, "ai")
 
 
-def add_user(username, password, admin=False):
+def add_user(username, password, userType="user"):
     con = sqlite3.connect("tsync.db")
     cur = con.cursor()
 
     id = str(uuid.uuid4())
     hash = bcrypt.hashpw(password.encode("utf-8"), pepper)
-    cur.execute("INSERT INTO user (id, username, passhash, admin) VALUES (?, ?, ?, ?)",
-                (id, username, hash, admin))
+    cur.execute("INSERT INTO user (id, username, passhash, type) VALUES (?, ?, ?, ?)",
+                (id, username, hash, userType))
     con.commit()
 
 

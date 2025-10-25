@@ -14,14 +14,6 @@
 
 (async function() {
     'use strict';
-    const url = "{{ url }}";
-
-    let apiKey = await GM_getValue("apikey", null);
-    let autoUpdate = await GM_getValue("autoUpdate", false);
-    let lastUpdate = 0;
-
-    let inps = document.querySelector('form').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
-
     function updateInputs() {
         inps.forEach(inp => {
             inp.setAttribute('value', inp.value);
@@ -81,7 +73,6 @@
             },
             onload: function(response) {
                 if (response.status == 200) {
-                    console.log(response.responseText);
                     showSolutions(JSON.parse(response.responseText));
                 } else {
                     error.textContent = "Failed to upload test: " + response.statusText;
@@ -95,12 +86,75 @@
 
     function showSolutions(solutions) {
         for (const key in solutions) {
+            const id = `tsync-solution-${key}`;
             const inp = document.getElementById(key);
-            const parent = inp.parentNode;
-            const solE = document.createElement('div');
+            let solE = document.getElementById(id);
+            if (!solE) {
+                const parent = inp.parentNode;
+                solE = document.createElement('div');
+                solE.id = id;
+                parent.appendChild(solE);
+            }
             solE.innerHTML = solutions[key];
-            parent.appendChild(solE);
         }
+        document.getElementsByClassName('tsync-ai-btn').forEach((aibtn) => {
+            aibtn.addEventListener('click', () => askai(aibtn.id.split("-").at(-1)));
+        });
+    }
+
+    function requestFailed(errorMsg, interval) {
+        error.textContent = errorMsg;
+        document.getElementsByClassName('tsync-ai-btn').forEach((btn) => {
+            btn.classList.remove('loading');
+        });
+        clearInterval(interval);
+        info.textContent = "";
+    }
+
+    function askai(id) {
+        document.getElementsByClassName('tsync-ai-btn').forEach((btn) => {
+            btn.classList.add('loading');
+        });
+
+        let i = 0;
+        let j = 1;
+        info.textContent = waitingMessages[0];
+        const interval = setInterval(() => {
+            if (j == 0) {
+                info.textContent = waitingMessages[i];
+            } else {
+                info.textContent += ".";
+            }
+            j++;
+            if (j == 5) {
+                j = 0;
+                i++;
+            }
+            if (i == waitingMessages.length) {
+                clearInterval(interval);
+                info.textContent = "";
+            }
+        }, 500);
+        GM_xmlhttpRequest({
+            method: "GET",
+            url: url + `/api/aianswer/${id}`,
+            headers: {
+                "tsync-api-key": apiKey,
+            },
+            timeout: 80000,
+            onload: function(_) {
+                downloadSolutions();
+                clearInterval(interval);
+                info.textContent = "";
+            },
+            onerror: function(error) {
+                requestFailed(`${error.responseText}  ${error.status}`, interval);
+            },
+            ontimeout: function() {
+                requestFailed("AI response timed out. Try again later.", interval);
+            }
+        });
+
     }
 
     function updateApiKey() {
@@ -132,36 +186,24 @@
         }
     }
 
-    GM_addStyle(`
-        .tsync-main-box {
-            z-index: 9999;
-            position: fixed;
-            bottom: 1rem;
-            left: 1rem;
-            background-color: #3c3c3c;
-            padding: 0.5rem;
-            border-radius: 0.3rem;
-            color: white;
-            box-shadow: 5px 5px 5px black;
-        }
+    GM_addStyle(`{{ styles }}`);
 
-        .tsync-btn {
-            background-color: #3a7cff;
-            border-radius: 0.4rem;
-            border-style: hidden;
-            margin: 0.3rem;
-            display: block;
-            width: 12rem;
-            color: white;
-        }
+    const url = "{{ url }}";
 
-        .tsync-btn:hover {
-        }
+    let apiKey = await GM_getValue("apikey", null);
+    let autoUpdate = await GM_getValue("autoUpdate", false);
+    let lastUpdate = 0;
 
-        .text-box {
-            margin-inline: 1rem;
-        }
-    `);
+    let inps = document.querySelector('form').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
+
+    const waitingMessages = [
+        "Sending request",
+        "Analyzing",
+        "Thinking",
+        "Consulting the oracle",
+        "Synthesizing insights",
+        "Almost there"
+    ];
 
     // ui
     const box = document.createElement('div');

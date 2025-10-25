@@ -48,7 +48,8 @@
     --clr-neutral-a50: #000000;
 }
 
-:root {
+.root {
+    font-family: Arial, sans-serif;
     background-color: var(--clr-neutral-a40);
     color: var(--clr-neutral-a0);
 }
@@ -63,6 +64,14 @@ h2 {
 
 h3 {
     font-size: 1.5rem;
+}
+
+a {
+    color: var(--clr-info-a0);
+}
+
+a:visited {
+    color: var(--clr-info-a0);
 }
 
 .header {
@@ -99,6 +108,7 @@ h3 {
     border-radius: 0.3rem;
     padding: 0.2rem;
     padding-inline: 0.5rem;
+    color: var(--clr-neutral-a0);
 }
 
 .button-link:visited {
@@ -113,9 +123,9 @@ h3 {
 
 .box {
     background-color: var(--clr-neutral-a30);
-    box-shadow: 4px 4px 10px var(--clr-neutral-a50);
+    box-shadow: 0px 4px 10px var(--clr-neutral-a50);
     padding: 2rem;
-    border-radius: 1rem;
+    border-radius: 0.3rem;
 }
 
 .login-box {
@@ -123,6 +133,30 @@ h3 {
     margin: auto;
     padding-top: 0.5rem;
     margin-top: 2rem;
+    width: 22rem;
+}
+
+.box h3 {
+    text-align: center;
+
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+.form-group input {
+    padding: 0.4rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
 }
 
 .btn-primary {
@@ -132,14 +166,45 @@ h3 {
     border-style: none;
     padding: 0.3rem;
     min-width: 5rem;
+    transition: background 0.2s;
+    margin: 0.1rem;
 }
 
 .btn-primary:hover {
     background-color: var(--clr-primary-a10);
 }
 
-.content {
-    min-width: 40rem;
+.long-btn {
+    width: 100%;
+    padding: 0.7rem;
+    color: var(--clr-neutral-a0);
+    border: none;
+    border-radius: 0.1rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.btn-secondary {
+    border: none;
+    color: var(--clr-primary-a0);
+    background-color: #0000;
+}
+
+.btn-secondary:hover {
+    background-color: #0004;
+}
+
+.btn-danger {
+    background-color: var(--clr-danger-a0);
+}
+
+.btn-danger:hover {
+    background-color: var(--clr-danger-a10);
+}
+
+#tsync-content {
+    max-width: 50rem;
+    min-width: 30rem;
     width: max-content;
     margin: auto;
 }
@@ -151,6 +216,10 @@ h3 {
 .history {
     padding-top: 1rem;
     margin-top: 2rem;
+}
+
+.history ul {
+    padding: 0;
 }
 
 
@@ -170,8 +239,8 @@ h3 {
 
 #drop-zone {
     border-style: solid;
-    border-color: black;
-    max-width: 20rem;
+    border-color: var(--clr-primary-a40);
+    text-align: center;
     height: 10rem;
 }
 
@@ -202,4 +271,109 @@ h3 {
 
 .answer-unknown {
     color: var(--clr-info-a30);
+}
+
+.flex {
+    display: flex;
+}
+
+.ma {
+    margin: auto;
+}
+
+.danger-text {
+    background-color: var(--clr-danger-a0);
+    color: var(--clr-neutral-a0);
+    text-align: center;
+    margin-block: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 0.3rem;
+}
+
+.tsync-main-box {
+    z-index: 9999;
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    background-color: var(--clr-neutral-a40);
+    padding: 0.7rem;
+    border-radius: 0.3rem;
+    color: var(--clr-neutral-a0);
+    box-shadow: 5px 5px 5px black;
+    width: 13rem;
+}
+
+.tsync-btn {
+    background-color: var(--clr-primary-a0);
+    border-radius: 0.3rem;
+    border-style: hidden;
+    margin-block: 0.2rem;
+    width: 100%;
+    color: var(--clr-neutral-a0);
+}
+
+.tsync-btn:hover {
+    background-color: var(--clr-primary-a10);
+}
+
+.tsync-ai-btn {
+    width: max-content;
+    display: inline-flex;
+    position: relative;
+}
+
+.text-box {
+    margin-inline: 1rem;
+}
+
+.tsync-answer-list {
+    color: var(--clr-neutral-a0);
+    background-color: var(--clr-neutral-a20);
+    border-radius: 0.5rem;
+    margin: 0.1rem;
+    padding: 0.3rem;
+}
+
+.answer-different {
+    background-color: var(--clr-warning-a0);
+}
+
+
+.tsync-ai-btn span {
+    transition: opacity 0.2s;
+}
+
+.tsync-ai-btn::after {
+    content: "";
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid var(--clr-info-a20);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) rotate(0deg);
+    animation: spin 1s linear infinite;
+    opacity: 0;
+    transition: opacity 0.2s;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+}
+
+.tsync-ai-btn.loading span {
+    opacity: 0;
+}
+
+.tsync-ai-btn.loading::after {
+    opacity: 1;
+}
+
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
 }

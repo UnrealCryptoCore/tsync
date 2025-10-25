@@ -2,20 +2,30 @@ import bs4
 
 
 class Answer:
-    def __init__(self, id, value, text=None, text_hash=None):
+    def __init__(self, id, value, text, tp, question_text=None, text_hash=None):
         self.id: str = id
-        if text_hash is None:
-            self.hash: str = hash(text)
-        else:
+        self.text = text
+        if text_hash is not None:
             self.hash = text_hash
+        else:
+            self.hash: str = hash(question_text)
         self.value: str = value
+        self.type: str = tp
+
+
+class Question:
+    def __init__(self, text):
+        self.text = text
+        self.hash = hash(text)
+        self.answers: list[Answer] = []
 
 
 class ETest:
-    def __init__(self, cmid, name, answers, html):
+    def __init__(self, cmid, name, answers, questions, html):
         self.cmid: str = cmid
         self.name: str = name
         self.answers: list[Answer] = answers
+        self.questions: list[Question] = questions
         self.html: str = html
 
 
@@ -68,7 +78,7 @@ def get_text(tag):
     return res + tag.get_text()
 
 
-def get_answer(soup, inp, text):
+def get_answer(soup, inp, qtext):
     if 'id' not in inp.attrs:
         return None
     id = inp['id']
@@ -80,14 +90,14 @@ def get_answer(soup, inp, text):
         return None
     value = inp['value']
     if t in ["radio", "checkbox"]:
-        value = 'checked' in inp.attrs
+        value = '1' if 'checked' in inp.attrs else '0'
 
-    text += get_text(inp.parent)
+    text = get_text(inp.parent).strip()
     others = soup.new_tag("div")
     others.string = f"%{id.upper()}%"
     inp.parent.append(others)
 
-    return Answer(id, value, text=text)
+    return Answer(id, value, text, t, qtext)
 
 
 def get_answers(soup, inps, text):
@@ -101,18 +111,26 @@ def get_answers(soup, inps, text):
 
 def parse_okutable(soup, tables):
     answers = []
+    questions = []
+    question_text = None
     for table in tables:
         trs = table.findAll('tr')
         for tr in trs:
+            extext = tr.find('td', attrs={'class': 'extext'})
+            if extext is not None:
+                question_text = get_text(extext)
+
             question = tr.find('td', attrs={'class': 'question'})
             answer = tr.find('td', attrs={'class': 'answers'})
             if question is None or answer is None:
                 continue
-            text = get_text(question)
+
+            text = question_text+get_text(question)
             inps = answer.findAll('input')
             answers.extend(get_answers(soup, inps, text))
+            questions.append(Question(text))
 
-    return answers
+    return answers, questions
 
 
 def parse_answers(soup, answs, text):
@@ -131,36 +149,59 @@ def parse_subquestions(soup, subques, text):
     return answers
 
 
+def handleLatex(soup):
+    math = soup.findAll(['span', 'div'], attrs={'class': 'MathJax'})
+    for e in math:
+        e = e.parent
+        latex = e.find('script')
+        if latex is None:
+            e = e.parent
+            latex = e.find('script')
+        e.parent.string = latex.get_text()
+
+
+def remove_tsync(soup):
+    es = soup.select('[class^="tsync-"]')
+    for e in es:
+        e.decompose()
+
+
 def parse_test(content: str) -> ETest:
     content = make_compatible(content)
     soup = bs4.BeautifulSoup(content, 'html.parser')
+    remove_tsync(soup)
 
     form = soup.body.find('form')
     if form is None:
         return None
 
-    assists = form.findAll('span', attrs={'class': 'MJX_Assistive_MathML'})
-    for a in assists:
-        a.decompose()
+    handleLatex(form)
 
     cmid = get_cmid(form)
     name = get_name(soup)
     answers = []
+    questions = []
     for que in form.findAll('div', attrs={'class': 'que'}):
         que = que.find('div', attrs={'class': 'content'})
         if que is None:
             continue
-
-        text = get_text(que)
+        outcome = que.find('div', attrs={'class': 'outcome'})
+        if outcome:
+            outcome.decompose()
 
         okutables = que.findAll('div', attrs={'class': 'okutable'})
-        res = parse_okutable(soup, okutables)
-        answers.extend(res)
+        oku_answers, oku_questions = parse_okutable(soup, okutables)
+        answers.extend(oku_answers)
+        questions.extend(oku_questions)
 
         # okutables can contain subquestions
         # and we dont want to parse them twice
-        if len(res) > 0:
+        if len(oku_questions) > 0:
             continue
+
+        qtext = que.find('div', attrs={'class': 'qtext'})
+        text = get_text(qtext)
+        questions.append(Question(text))
 
         answs = que.findAll(['div', 'span'], attrs={'class': 'answer'})
         answers.extend(parse_answers(soup, answs, text))
@@ -169,4 +210,4 @@ def parse_test(content: str) -> ETest:
         answers.extend(parse_subquestions(soup, subques, text))
 
     answers = list(filter(lambda x: x is not None, answers))
-    return ETest(cmid, name, answers, str(form))
+    return ETest(cmid, name, answers, questions, str(form))

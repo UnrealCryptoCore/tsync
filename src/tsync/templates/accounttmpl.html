@@ -9,53 +9,67 @@
 
 
 <h1>Account</h1>
-<div>
-    <span>Name: </span><span>{{ username }}</span>
-    <br>
-    <span>UserId: </span><span>{{ id }}</span>
-    <br>
+<div class="box">
+    <div>
+        <span>Name: </span><span>{{ username }}</span>
+    </div>
+    <div>
+        <span>UserId: </span><span>{{ id }}</span>
+    </div>
+    <div>
     <span>
         API Key:
         {%if key %}
-            <code>
+            <code class="token">
             {{ key }}
             </code>
-            <button onclick="navigator.clipboard.writeText('{{ key }}')">copy</button>
-            <button onclick="window.location.href='/account?key=False'">hide</button>
+            <div class="flex">
+            <button class="btn-secondary" onclick="window.location.href='/account?key=False'">hide</button>
+            <button class="btn-primary" onclick="navigator.clipboard.writeText('{{ key }}')">copy</button>
         {% else %}
-            <button onclick="window.location.href='/account?key=True'">show</button>
+            <div class="flex">
+            <button class="btn-secondary" onclick="window.location.href='/account?key=True'">show</button>
             <form action="/apikey-create" method="post">
-                <input type="submit" value="generate">
+                <input class="btn-primary" type="submit" value="generate">
             </form>
        {% endif %}
         <form action="/apikey-delete" method="post">
-            <input type="submit" value="delete">
+            <input class="btn-primary btn-danger" type="submit" value="delete">
         </form>
+        </div>
     </span>
-</div>
-<form action="/resetpass" method="post">
-    {% if passfail %}
-    <div>
-        Wrong password or passwords do not match.
     </div>
-    {% endif %}
-    <h3>Reset password</h3>
-    <label>old password</label>
-    <input type="password" name="opass">
-    <br>
-    <br>
-    <label>new password</label>
-    <input type="password" name="npass">
-    <br>
-    <br>
-    <label>retype password</label>
-    <input type="password" name="rpass">
-    <br>
-    <br>
-    <input type="submit" value="reset">
-</form>
+</div>
+<br>
+<div class="box">
+    <form action="/resetpass" method="post">
+        <h3>Reset password</h3>
+        {% if passfail %}
+        <div class="danger-text">
+            <p>Wrong password or passwords do not match.</p>
+        </div>
+        {% endif %}
+ 
+       <div class="form-group">
+            <label>old password</label>
+            <input type="password" name="opass">
+        </div>
+        <div class="form-group">
+            <label class="">new password</label>
+            <input type="password" name="npass">
+        </div>
+        <div class="form-group">
+            <label>retype password</label>
+            <input type="password" name="rpass">
+        </div>
+       <div class="flex">
+            <input class="btn-primary btn-danger long-btn" type="submit" value="reset">
+        </div>
+    </form>
+</div>
 <br>
 <br>
-<br>
-<button onclick="logout()">Logout</button>
+<div class="flex">
+    <button class="btn-primary btn-danger ma" onclick="logout()">Logout</button>
+</div>
 {% endblock %}

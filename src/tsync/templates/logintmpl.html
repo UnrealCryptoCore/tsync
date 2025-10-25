@@ -6,19 +6,19 @@
         <h3>Login</h3>
         <form method="post" action="/login">
             {% if invalid %}
-            <div>
+            <div class="danger-text">
                 <p>Password or username is incorrect</p>
             </div>
             {% endif %}
-            <label>Username:</label>
-            <input type="text" name="username">
-            <br>
-            <br>
-            <label>Password:</label>
-            <input type="password" name="password">
-            <br>
-            <br>
-            <input class="btn-primary" type="submit" value="login">
+            <div class="form-group">
+            <label>Username</label>
+            <input type="text" name="username" required>
+            </div>
+            <div class="form-group">
+            <label>Password</label>
+            <input type="password" name="password" required>
+            </div>
+            <button class="btn-primary long-btn" type="submit">Sign In</button>
         </form>
     </div>
 </div>
