@@ -11,7 +11,6 @@ from flask import (
     session,
     jsonify,
     g,
-    url_for,
 )
 from markupsafe import Markup
 from .auth import login_required, api_key_required
@@ -96,7 +95,7 @@ def save_answers(user_id, cmid, answers, questions=None):
                         INSERT into answer_v2
                             (cmid, id, user_id, hash, text, value, type)
                         VALUES (?, ?, ?, ?, ?, ?, ?)
-                        ON CONFLICT(cmid, id)
+                        ON CONFLICT(cmid, id, user_id)
                         DO UPDATE SET
                             hash = excluded.hash,
                             text = excluded.text,
@@ -270,7 +269,6 @@ def api_ai_answer(aid):
                         WHERE
                             hash=? AND value=? AND user_id=?
                           """, (hash, value, ai_user_id)).fetchone()
-    print(res[0])
     if res[0] > 0:
         return "", 200
 
@@ -341,6 +339,12 @@ def tm_script():
 
 @bp.route("/helloworld")
 def hello_world():
+    return "<p>Hello, World!</p>"
+
+
+@bp.route("/secure-helloworld")
+@api_key_required
+def secure_hello_world():
     return "<p>Hello, World!</p>"
 
 

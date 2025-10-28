@@ -11,6 +11,7 @@ from flask import (
     url_for,
     current_app,
     g,
+    jsonify,
 )
 
 from tsync.db import get_db
@@ -88,16 +89,36 @@ def reset_pass():
     return redirect("/account")
 
 
+def create_apikey(user_id):
+    key = secrets.token_urlsafe(32)
+
+    db = get_db()
+    db.cursor().execute("UPDATE user SET api_key=? WHERE id=?", (key, user_id))
+    db.commit()
+    return key
+
+
 @bp.post("/apikey-create")
 @login_required
 def make_apikey():
     id = session['id']
-    key = secrets.token_urlsafe(32)
-
-    db = get_db()
-    db.cursor().execute("UPDATE user SET api_key=? WHERE id=?", (key, id))
-    db.commit()
+    create_apikey(id)
     return redirect("/account?key=True")
+
+
+@bp.get("/apikey-get")
+@login_required
+def get_apikey():
+    id = session['id']
+    db = get_db()
+    res = db.cursor().execute("SELECT api_key FROM user WHERE id=?", (id, ))
+    res = res.fetchone()
+    key = res[0]
+    if key is None:
+        key = create_apikey(id)
+    return jsonify({
+        'key': key,
+    })
 
 
 @bp.post("/apikey-delete")

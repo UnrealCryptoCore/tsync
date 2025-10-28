@@ -66,7 +66,7 @@ def setup_db():
             text VARCHAR(255),
             value VARCHAR(255),
             type VARCHAR(32),
-            PRIMARY KEY (cmid, id))
+            PRIMARY KEY (cmid, id, user_id))
         """)
 
     cur.execute("""

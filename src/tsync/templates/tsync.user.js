@@ -1,19 +1,33 @@
 // ==UserScript==
-// @name         Tsync
+// @name         TSync
 // @namespace    http://tampermonkey.net/
-// @version      2025-06-19
-// @description  Convinient way to upload files to tsync
+// @version      2025-10-28
+// @description  Convenient way to upload files to tsync
 // @author       CryptoCore
 // @match        https://moodle.rwth-aachen.de/mod/quiz/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=rwth-aachen.de
+// @match        {{ url }}/*
+// @icon         {{ url }}/static/favicon-rwth.png
 // @grant        GM_xmlhttpRequest
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_addStyle
 // ==/UserScript==
 
-(async function() {
-    'use strict';
+
+
+async function handleTsync(url, apiKey) {
+    if (apiKey !== null) {
+        return;
+    }
+    const res = await fetch(`${url}/apikey-get`);
+    if (res.ok) {
+        data = await res.json()
+        apiKey = data.key;
+        GM_setValue("apikey", apiKey);
+    }
+}
+
+async function handleMoodle(url, apiKey) {
     function updateInputs() {
         inps.forEach(inp => {
             inp.setAttribute('value', inp.value);
@@ -186,11 +200,9 @@
         }
     }
 
-    GM_addStyle(`{{ styles }}`);
 
-    const url = "{{ url }}";
 
-    let apiKey = await GM_getValue("apikey", null);
+
     let autoUpdate = await GM_getValue("autoUpdate", false);
     let lastUpdate = 0;
 
@@ -261,8 +273,24 @@
 
     document.body.appendChild(box);
 
-    // event handling
+    // check for user input
     inps.forEach(inp => {
         inp.addEventListener('input', valueChange);
     });
+
+}
+
+(async function() {
+    'use strict';
+    GM_addStyle(`{{ styles }}`);
+
+    const url = "{{ url }}";
+
+    const apiKey = await GM_getValue("apikey", null);
+
+    if (window.location.href.startsWith(url)) {
+        handleTsync(url, apiKey);
+    } else {
+        handleMoodle(url, apiKey);
+    }
 })();

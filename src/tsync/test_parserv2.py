@@ -157,7 +157,7 @@ def handleLatex(soup):
         if latex is None:
             e = e.parent
             latex = e.find('script')
-        e.parent.string = latex.get_text()
+        e.string = latex.get_text()
 
 
 def remove_tsync(soup):
