@@ -19,8 +19,11 @@ def main():
     if cmd == "setup":
         setup_db()
         return
-    if cmd == "user" and len(sys.argv) == 4:
-        add_user(sys.argv[2], sys.argv[3])
+    if cmd == "user" and len(sys.argv) >= 4:
+        tp = "user"
+        if len(sys.argv) == 5:
+            tp = sys.argv[4]
+        add_user(sys.argv[2], sys.argv[3], tp)
         return
     if cmd == "exec" and len(sys.argv) == 3:
         print(sys.argv[2])

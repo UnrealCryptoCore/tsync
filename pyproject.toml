@@ -9,6 +9,7 @@ dependencies = [
     "beautifulsoup4",
     "gunicorn",
     "bleach",
+    "google-genai",
 ]
 
 [tool.setuptools]
