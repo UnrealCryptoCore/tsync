@@ -79,8 +79,6 @@ def get_text(tag):
         key = None
         if img.has_attr('href'):
             key = 'href'
-        elif img.has_attr('src'):
-            key = 'src'
         if key is not None:
             res.append(img[key])
     res = "\n".join(res)
