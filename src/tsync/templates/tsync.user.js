@@ -74,13 +74,28 @@ async function handleMoodle(url, apiKey) {
     }
 
     function getCMID() {
-        return new URL(location.href).searchParams.get('cmid');
+        let cmid = new URL(location.href).searchParams.get('cmid');
+        if (cmid) {
+            return cmid;
+        }
+        // backup if url does not exist
+        document.getElementsByTagName('body').classList.forEach((c) => {
+            if (c.startsWith('cmid')) {
+                return c.split('-')[1];
+            }
+        });
+        return null;
     }
 
     function downloadSolutions() {
+        const cmid = getCMID();
+        if (cmid == null) {
+            error.textContent = "Could not find cmid.";
+            return;
+        }
         GM_xmlhttpRequest({
             method: "GET",
-            url: url + `/api/solutions/${getCMID()}`,
+            url: url + `/api/solutions/${cmid}`,
             headers: {
                 "Content-Type": "application/text",
                 "tsync-api-key": apiKey,
