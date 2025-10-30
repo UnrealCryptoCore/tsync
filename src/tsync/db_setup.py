@@ -90,14 +90,15 @@ def setup_db():
 
     add_user("admin", "admin", "admin")
     add_user("test", "test")
-    add_user(ai_username, ai_username, "ai")
+    add_user(ai_username, ai_username, "ai", "11111111-1111-1111-1111-111111111111")
 
 
-def add_user(username, password, userType="user"):
+def add_user(username, password, userType="user", id=None):
     con = sqlite3.connect("tsync.db")
     cur = con.cursor()
 
-    id = str(uuid.uuid4())
+    if id is None:
+        id = str(uuid.uuid4())
     hash = bcrypt.hashpw(password.encode("utf-8"), pepper)
     cur.execute("INSERT INTO user (id, username, passhash, type) VALUES (?, ?, ?, ?)",
                 (id, username, hash, userType))

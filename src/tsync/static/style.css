@@ -52,6 +52,7 @@
     font-family: Arial, sans-serif;
     background-color: var(--clr-neutral-a40);
     color: var(--clr-neutral-a0);
+    min-height: 100vh;
 }
 
 h1 {
@@ -74,7 +75,7 @@ a:visited {
     color: var(--clr-info-a0);
 }
 
-.header {
+.tsync-header {
     width: 100%;
     background-color: var(--clr-primary-a30);
     color: var(--clr-neutral-a0);
@@ -121,7 +122,7 @@ a:visited {
     background-color: var(--clr-primary-a40);
 }
 
-.box {
+.tsync-box {
     background-color: var(--clr-neutral-a30);
     box-shadow: 0px 4px 10px var(--clr-neutral-a50);
     padding: 2rem;
@@ -136,7 +137,7 @@ a:visited {
     width: 22rem;
 }
 
-.box h3 {
+.tsync-box h3 {
     text-align: center;
 
 }
@@ -159,7 +160,7 @@ a:visited {
     font-size: 1rem;
 }
 
-.btn-primary {
+.tsync-btn-primary {
     color: var(--clr-primary-a50);
     background-color: var(--clr-primary-a0);
     border-radius: 0.3rem;
@@ -170,7 +171,7 @@ a:visited {
     margin: 0.1rem;
 }
 
-.btn-primary:hover {
+.tsync-btn-primary:hover {
     background-color: var(--clr-primary-a10);
 }
 
@@ -184,14 +185,19 @@ a:visited {
     cursor: pointer;
 }
 
-.btn-secondary {
-    border: none;
-    color: var(--clr-primary-a0);
-    background-color: #0000;
+.tsync-btn-secondary {
+    border-style: none;
+    padding: 0.3rem;
+    min-width: 5rem;
+    transition: background 0.2s;
+    border-radius: 0.3rem;
+    margin: 0.1rem;
+    background-color: var(--clr-neutral-a40);
+    color: var(--clr-neutral-a0);
 }
 
-.btn-secondary:hover {
-    background-color: #0004;
+.tsync-btn-secondary:hover {
+    background-color: var(--clr-neutral-a50);
 }
 
 .btn-danger {

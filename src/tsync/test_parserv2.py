@@ -175,10 +175,17 @@ def remove_tsync(soup):
         e.decompose()
 
 
+def remove_answerN(soup):
+    ans = soup.findAll(['div', 'span'], attrs={'class': 'answernumber'})
+    for an in ans:
+        an.decompose()
+
+
 def parse_test(content: str) -> ETest:
     content = make_compatible(content)
     soup = bs4.BeautifulSoup(content, 'html.parser')
     remove_tsync(soup)
+    remove_answerN(soup)
 
     form = soup.body.find('form')
     if form is None:

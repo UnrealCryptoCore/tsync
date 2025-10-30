@@ -2,7 +2,7 @@
 {% block title %}Index{% endblock %}
 {% block content %}
 <div class="content">
-    <div class="box upload-box">
+    <div class="tsync-box upload-box">
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             <div class="error">
@@ -22,15 +22,15 @@
             </div>
 
             <div>
-                <input id="fileinp" class="btn-secondary" type="file" name="file" accept=".html, .htm" />
+                <input id="fileinp" class="tsync-btn-secondary" type="file" name="file" accept=".html, .htm" />
             </div>
             <br>
             <div>
-                <input class="upload-button btn-primary" type="submit" value="Upload" />
+                <input class="upload-button tsync-btn-primary" type="submit" value="Upload" />
             </div>
        </form>
     </div>
-    <div class="box history">
+    <div class="tsync-box history">
         <h3>History</h3>
         <ul>
             {% for test in hist %}

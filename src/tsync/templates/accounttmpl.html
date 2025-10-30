@@ -9,7 +9,7 @@
 
 
 <h1>Account</h1>
-<div class="box">
+<div class="tsync-box">
     <div>
         <span>Name: </span><span>{{ username }}</span>
     </div>
@@ -24,24 +24,24 @@
             {{ key }}
             </code>
             <div class="flex">
-            <button class="btn-secondary" onclick="window.location.href='/account?key=False'">hide</button>
-            <button class="btn-primary" onclick="navigator.clipboard.writeText('{{ key }}')">copy</button>
+            <button class="tsync-btn-secondary" onclick="window.location.href='/account?key=False'">hide</button>
+            <button class="tsync-btn-primary" onclick="navigator.clipboard.writeText('{{ key }}')">copy</button>
         {% else %}
             <div class="flex">
-            <button class="btn-secondary" onclick="window.location.href='/account?key=True'">show</button>
+            <button class="tsync-btn-secondary" onclick="window.location.href='/account?key=True'">show</button>
             <form action="/apikey-create" method="post">
-                <input class="btn-primary" type="submit" value="generate">
+                <input class="tsync-btn-primary" type="submit" value="generate">
             </form>
        {% endif %}
         <form action="/apikey-delete" method="post">
-            <input class="btn-primary btn-danger" type="submit" value="delete">
+            <input class="tsync-btn-primary btn-danger" type="submit" value="delete">
         </form>
         </div>
     </span>
     </div>
 </div>
 <br>
-<div class="box">
+<div class="tsync-box">
     <form action="/resetpass" method="post">
         <h3>Reset password</h3>
         {% if passfail %}
@@ -63,13 +63,13 @@
             <input type="password" name="rpass">
         </div>
        <div class="flex">
-            <input class="btn-primary btn-danger long-btn" type="submit" value="reset">
+            <input class="tsync-btn-primary btn-danger long-btn" type="submit" value="reset">
         </div>
     </form>
 </div>
 <br>
 <br>
 <div class="flex">
-    <button class="btn-primary btn-danger ma" onclick="logout()">Logout</button>
+    <button class="tsync-btn-primary btn-danger ma" onclick="logout()">Logout</button>
 </div>
 {% endblock %}

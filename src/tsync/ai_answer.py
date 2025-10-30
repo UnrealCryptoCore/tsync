@@ -1,8 +1,8 @@
-from google import genai
 import dotenv
 import pydantic
 import json
 import time
+from google import genai
 
 ALPHABET = [chr(i) for i in range(ord('A'), ord('Z')+1)]
 
@@ -86,5 +86,5 @@ Geben Sie Ihr Ergebnis ggf. auf drei Nachkommastellen genau ein und verwenden Si
    """
     dotenv.load_dotenv()
     model = AIModel()
-    res = model.answer_question(quest, [])
+    res = model.answer_question(quest, MultipleChoice)
     print(res)
