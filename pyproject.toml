@@ -8,6 +8,7 @@ dependencies = [
     "bcrypt",
     "beautifulsoup4",
     "gunicorn",
+    "bleach",
 ]
 
 [tool.setuptools]
