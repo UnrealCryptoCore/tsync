@@ -76,11 +76,13 @@ def get_text(tag):
     imgs = tag.findAll('img')
     res = []
     for img in imgs:
-        if 'href' in img:
+        key = None
+        if img.has_attr('href'):
             key = 'href'
-        elif 'src' in img:
+        elif img.has_attr('src'):
             key = 'src'
-        res.append(img[key])
+        if key is not None:
+            res.append(img[key])
     res = "\n".join(res)
     return res + tag.get_text()
 
