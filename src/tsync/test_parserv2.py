@@ -74,7 +74,14 @@ def get_cmid(form):
 
 def get_text(tag):
     imgs = tag.findAll('img')
-    res = "\n".join([img['href'] for img in imgs])
+    res = []
+    for img in imgs:
+        if 'href' in img:
+            key = 'href'
+        elif 'src' in img:
+            key = 'src'
+        res.append(img[key])
+    res = "\n".join(res)
     return res + tag.get_text()
 
 
