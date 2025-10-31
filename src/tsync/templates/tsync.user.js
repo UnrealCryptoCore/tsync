@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TSync
 // @namespace    http://tampermonkey.net/
-// @version      2025-10-28
+// @version      2025-10-31
 // @description  Convenient way to upload files to tsync
 // @author       CryptoCore
 // @match        https://moodle.rwth-aachen.de/mod/quiz/*
@@ -49,28 +49,31 @@ async function handleMoodle(url, apiKey) {
         updateInputs();
         let fullHTML = document.body.outerHTML;
 
-        GM_xmlhttpRequest({
-            method: "POST",
-            url: url + "/api/upload",
-            headers: {
-                "Content-Type": "application/text",
-                "tsync-api-key": apiKey,
-            },
-            data: fullHTML,
-            onload: function(response) {
-                if (response.status == 200) {
+        return new Promise((resolve, _) =>
+            GM_xmlhttpRequest({
+                method: "POST",
+                url: url + "/api/upload",
+                headers: {
+                    "Content-Type": "application/text",
+                    "tsync-api-key": apiKey,
+                },
+                data: fullHTML,
+                onload: function(_) {
                     if (!autoUpdate) {
                         info.textContent = "Uploaded test.";
                         error.textContent = "";
                     }
-                } else {
-                    error.textContent = "Failed to upload test: " + response.statusText;
+                    didUpload = true;
+                    resolve(true);
+                },
+                onerror: function(error) {
+                    error.textContent = "Failed to upload test.";
+                    resolve(false);
                 }
-            },
-            onerror: function(error) {
-                error.textContent = "Failed to upload test.";
-            }
-        });
+            })
+        );
+
+
     }
 
     function getCMID() {
@@ -87,7 +90,13 @@ async function handleMoodle(url, apiKey) {
         return null;
     }
 
-    function downloadSolutions() {
+    async function downloadSolutions() {
+        if (!didUpload) {
+            const res = await uploadPage();
+            if (!res) {
+                return;
+            }
+        }
         const cmid = getCMID();
         if (cmid == null) {
             error.textContent = "Could not find cmid.";
@@ -216,10 +225,11 @@ async function handleMoodle(url, apiKey) {
     }
 
 
+    GM_addStyle(`{{ styles }}`);
 
-
-    let autoUpdate = await GM_getValue("autoUpdate", false);
+    let autoUpdate = await GM_getValue("autoUpdate", true);
     let lastUpdate = 0;
+    let didUpload = false;
 
     let inps = document.querySelector('form').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
 
@@ -297,7 +307,6 @@ async function handleMoodle(url, apiKey) {
 
 (async function() {
     'use strict';
-    GM_addStyle(`{{ styles }}`);
 
     const url = "{{ url }}";
 
