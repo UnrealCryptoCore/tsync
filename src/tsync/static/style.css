@@ -287,6 +287,16 @@ a:visited {
     margin: auto;
 }
 
+.tsync-warning-text {
+    background-color: var(--clr-warning-a0);
+    color: var(--clr-neutral-a0);
+    text-align: center;
+    margin-block: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 0.3rem;
+
+}
+
 .danger-text {
     background-color: var(--clr-danger-a0);
     color: var(--clr-neutral-a0);

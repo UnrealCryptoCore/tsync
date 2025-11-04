@@ -21,18 +21,21 @@ async function handleTsync(url, apiKey) {
     }
     const res = await fetch(`${url}/apikey-get`);
     if (res.ok) {
-        data = await res.json()
+        const data = await res.json()
         apiKey = data.key;
         GM_setValue("apikey", apiKey);
     }
 }
 
 async function handleMoodle(url, apiKey) {
+    function getInputs() {
+        return document.querySelector('form').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
+    }
+
     function updateInputs() {
-        inps.forEach(inp => {
+        getInputs().forEach(inp => {
             inp.setAttribute('value', inp.value);
             if (inp.getAttribute("type") == "checkbox" || inp.getAttribute("type") == "radio") {
-                inp.setAttribute('value', inp.checked ? "1" : "0");
                 if (inp.checked) {
                     inp.setAttribute('checked', 'checked');
                 } else {
@@ -231,7 +234,7 @@ async function handleMoodle(url, apiKey) {
     let lastUpdate = 0;
     let didUpload = false;
 
-    let inps = document.querySelector('form').querySelectorAll('input:not([type="hidden"]):not([type="submit"])');
+    let inps = getInputs();
 
     const waitingMessages = [
         "Sending request",
