@@ -61,12 +61,18 @@ async function handleMoodle(url, apiKey) {
                     "tsync-api-key": apiKey,
                 },
                 data: fullHTML,
-                onload: function(_) {
-                    if (!autoUpdate) {
-                        info.textContent = "Uploaded test.";
-                        error.textContent = "";
+                onload: function(res) {
+                    if (res.ok) {
+                        if (!autoUpdate) {
+                            info.textContent = "Uploaded test.";
+                            error.textContent = "";
+                        }
+                        didUpload = true;
+                    } else if (res.status === 401){
+                        error.textContent = "Invalid api-key.";
+                    } else {
+                        error.textContent = "Failed to upload test.";
                     }
-                    didUpload = true;
                     resolve(true);
                 },
                 onerror: function(error) {
