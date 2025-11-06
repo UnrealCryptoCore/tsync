@@ -214,6 +214,9 @@ def parse_test(content: str) -> ETest:
             continue
 
         qtext = que.find('div', attrs={'class': 'qtext'})
+        if qtext is None:
+            continue
+
         text = get_text(qtext)
         questions.append(Question(text))
 

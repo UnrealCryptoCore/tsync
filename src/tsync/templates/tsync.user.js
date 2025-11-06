@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TSync
 // @namespace    http://tampermonkey.net/
-// @version      2025-10-31
+// @version      2025-11-06
 // @description  Convenient way to upload files to tsync
 // @author       CryptoCore
 // @match        https://moodle.rwth-aachen.de/mod/quiz/*
@@ -34,13 +34,14 @@ async function handleMoodle(url, apiKey) {
 
     function updateInputs() {
         getInputs().forEach(inp => {
-            inp.setAttribute('value', inp.value);
             if (inp.getAttribute("type") == "checkbox" || inp.getAttribute("type") == "radio") {
                 if (inp.checked) {
                     inp.setAttribute('checked', 'checked');
                 } else {
                     inp.removeAttribute('checked');
                 }
+            } else {
+                inp.setAttribute('value', inp.value);
             }
         });
     }
@@ -62,13 +63,13 @@ async function handleMoodle(url, apiKey) {
                 },
                 data: fullHTML,
                 onload: function(res) {
-                    if (res.ok) {
+                    if (res.status == 200) {
                         if (!autoUpdate) {
                             info.textContent = "Uploaded test.";
-                            error.textContent = "";
                         }
+                        error.textContent = "";
                         didUpload = true;
-                    } else if (res.status === 401){
+                    } else if (res.status === 401) {
                         error.textContent = "Invalid api-key.";
                     } else {
                         error.textContent = "Failed to upload test.";
