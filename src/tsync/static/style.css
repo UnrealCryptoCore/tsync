@@ -222,6 +222,7 @@ a:visited {
 .history {
     padding-top: 1rem;
     margin-top: 2rem;
+    min-width: 30rem;
 }
 
 .history ul {

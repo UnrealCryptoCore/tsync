@@ -155,7 +155,7 @@ def handle_upload_v2(content: str, user_id: str):
 def get_history(user_id):
     db = get_db()
     res = db.cursor().execute(
-        "SELECT cmid, name FROM etest_v2 WHERE user_id=? AND cmid!=NULL", (user_id, ))
+        "SELECT cmid, name FROM etest_v2 WHERE user_id=? AND cmid IS NOT NULL", (user_id, ))
     res = res.fetchall()
 
     return res
