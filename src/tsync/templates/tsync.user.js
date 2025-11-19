@@ -92,7 +92,7 @@ async function handleMoodle(url, apiKey) {
             return cmid;
         }
         // backup if url does not exist
-        document.getElementsByTagName('body').classList.forEach((c) => {
+        document.getElementsByTagName('body')[0].classList.forEach((c) => {
             if (c.startsWith('cmid')) {
                 return c.split('-')[1];
             }

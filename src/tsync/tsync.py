@@ -140,8 +140,12 @@ def handle_upload_v2(content: str, user_id: str):
     try:
         etest = parse_test(content)
     except Exception as e:
-        raise e
+        print(e)
         return None, ("Input file is invalid.", 400)
+
+    if etest.cmid is None:
+        return None, ("Input file is invalid.", 400)
+
     save_etest(user_id, etest)
     if False:
         backup_test(etest, content, user_id)
@@ -151,7 +155,7 @@ def handle_upload_v2(content: str, user_id: str):
 def get_history(user_id):
     db = get_db()
     res = db.cursor().execute(
-        "SELECT cmid, name FROM etest_v2 WHERE user_id=?", (user_id, ))
+        "SELECT cmid, name FROM etest_v2 WHERE user_id=? AND cmid!=NULL", (user_id, ))
     res = res.fetchall()
 
     return res
