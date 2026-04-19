@@ -136,6 +136,9 @@ async function handleMoodle(url, apiKey) {
         for (const key in solutions) {
             const id = `tsync-solution-${key}`;
             const inp = document.getElementById(key);
+            if (inp === null) {
+                continue;
+            }
             let solE = document.getElementById(id);
             if (!solE) {
                 const parent = inp.parentNode;
@@ -190,10 +193,16 @@ async function handleMoodle(url, apiKey) {
                 "tsync-api-key": apiKey,
             },
             timeout: 80000,
-            onload: function(_) {
-                downloadSolutions();
-                clearInterval(interval);
-                info.textContent = "";
+            onload: function(res) {
+                if (res.status == 200) {
+                    downloadSolutions();
+                    info.textContent = "";
+                    clearInterval();
+                } else if (res.status === 401) {
+                    requestFailed("Invalid api-key.", interval);
+                } else {
+                    requestFailed("Could not generate answer.", interval);
+                }
             },
             onerror: function(error) {
                 requestFailed(`${error.responseText}  ${error.status}`, interval);

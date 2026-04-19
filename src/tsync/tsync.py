@@ -197,7 +197,8 @@ def answer_to_html(ans, group, ai_answer):
             ai_button = f"""
             <button
             id='tsync-ai-btn-{ans.id}'
-            class='tsync-btn tsync-ai-btn'>
+            class='tsync-btn tsync-ai-btn'
+            type='button'>
                 <span>ask ai ✨</span>
             </button>
             """
