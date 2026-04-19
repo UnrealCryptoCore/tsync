@@ -4,7 +4,29 @@ moodle test comparison tool
 
 ## Development
 
-- (install modules: `sudo pacman -S python-bcrypt python-dotenv`)
-- create db: `python src/tsync/db_setup.py setup`
-- start server: `flask --app src.tsync run`
-- build the package: `python -m build --wheel`
+### Setup
+
+To initialize the project run the following commands:
+`bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+`
+
+To setup the database run 
+`bash
+python src/tsync/db_setup.py setup
+`
+
+### Start Server
+`bash
+flask --app src.tsync run
+`
+
+
+## Production
+
+Build the package using
+`bash
+python -m build --wheel
+`

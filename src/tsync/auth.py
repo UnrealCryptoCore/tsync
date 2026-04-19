@@ -14,7 +14,7 @@ from flask import (
     jsonify,
 )
 
-from tsync.db import get_db
+from .db import get_db
 
 bp = Blueprint('auth', __name__)
 

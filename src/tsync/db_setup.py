@@ -85,7 +85,8 @@ def setup_db():
             user_id CHAR(36),
             name VARCHAR(255),
             html TEXT,
-            PRIMARY KEY (cmid, user_id))
+            page VARCHAR(255),
+            PRIMARY KEY (cmid, user_id, page))
         """)
 
     add_user("admin", "admin", "admin")

@@ -19,6 +19,7 @@ from .test_parserv2 import (
     parse_test,
     ETest,
     Answer,
+    Question,
 )
 from .ai_answer import (
     AIModel,
@@ -35,10 +36,12 @@ def get_etest_v2(cmid, user_id):
     db = get_db()
     res = db.cursor().execute(
         "SELECT name, html FROM etest_v2 WHERE cmid=? AND user_id=?", (cmid, user_id))
-    etest = res.fetchone()
-    if etest is None:
+    etests = res.fetchall()
+    if len(etests) == 0:
         return None, None
-    etest = ETest(cmid, etest[0], [], [], etest[1])
+    name = etests[0][0]
+    html = "<br>".join([e[1] for e in etests])
+    etest = ETest(cmid, name, [], [], html)
     res = db.cursor().execute("""
                             SELECT id, value, text, type, hash
                             FROM answer_v2
@@ -47,6 +50,7 @@ def get_etest_v2(cmid, user_id):
                               (cmid, user_id))
     answers = res.fetchall()
     groups = []
+    questions = []
     for i, ans in enumerate(answers):
         ans = Answer(ans[0], ans[1], ans[2], ans[3], text_hash=ans[4])
         answers[i] = ans
@@ -74,7 +78,18 @@ def get_etest_v2(cmid, user_id):
             else:
                 group[key] = [val]
         groups.append(group)
+
+        res = db.cursor().execute(
+            """
+            SELECT question
+            FROM question_v2
+            WHERE id=?
+            """,
+            (ans.hash, )).fetchall()
+        questions.extend([Question(e[0]) for e in res])
     etest.answers = answers
+    etest.questions = questions
+
     return etest, groups
 
 
@@ -117,13 +132,13 @@ def save_etest(user_id, etest):
     db = get_db()
     db.cursor().execute("""
                         INSERT into etest_v2
-                            (user_id, cmid, name, html)
-                        VALUES (?, ?, ?, ?)
-                        ON CONFLICT(cmid, user_id)
+                            (user_id, cmid, name, html, page)
+                        VALUES (?, ?, ?, ?, ?)
+                        ON CONFLICT(cmid, user_id, page)
                         DO UPDATE SET
                             html = excluded.html
                         """,
-                        (user_id, etest.cmid, etest.name, etest.html))
+                        (user_id, etest.cmid, etest.name, etest.html, etest.page))
     save_answers(user_id, etest.cmid, etest.answers, etest.questions)
     db.commit()
 
@@ -155,7 +170,7 @@ def handle_upload_v2(content: str, user_id: str):
 def get_history(user_id):
     db = get_db()
     res = db.cursor().execute(
-        "SELECT cmid, name FROM etest_v2 WHERE user_id=? AND cmid IS NOT NULL", (user_id, ))
+        "SELECT cmid, name FROM etest_v2 WHERE user_id=? AND cmid IS NOT NULL GROUP BY cmid", (user_id, ))
     res = res.fetchall()
 
     return res
@@ -206,6 +221,7 @@ def test_page(testid):
     test, groups = get_etest_v2(testid, user_id)
     if test is None:
         return render_template("testnotfoundtmpl.html"), 404
+    render = test.make_html()
     render = test.html
     for ans, group in zip(test.answers, groups):
         s = answer_to_html(ans, group, False)

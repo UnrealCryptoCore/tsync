@@ -21,12 +21,16 @@ class Question:
 
 
 class ETest:
-    def __init__(self, cmid, name, answers, questions, html):
+    def __init__(self, cmid, name, answers, questions, html, page=None):
         self.cmid: str = cmid
+        self.page = page
         self.name: str = name
         self.answers: list[Answer] = answers
         self.questions: list[Question] = questions
         self.html: str = html
+
+    def make_html(self) -> str:
+        return "<br><br>".join([q.text for q in self.questions])
 
 
 def make_compatible(content):
@@ -47,6 +51,28 @@ def get_name(phtml):
         return "Unkown name"
 
     return "/".join(p)
+
+
+def parse_query_params(params):
+    res = {}
+    for p in params.split('&'):
+        kv = p.split('=')
+        if len(kv) != 2:
+            continue
+        res[kv[0]] = kv[1]
+    return res
+
+
+def get_page(soup):
+    data = soup.body.find('input', attrs={'class': 'questionflagpostdata'})
+    if data is None:
+        return None
+
+    value = data['value']
+    values = parse_query_params(value)
+    if 'slot' not in values:
+        return None
+    return values['slot']
 
 
 def get_cmid(form):
@@ -85,26 +111,66 @@ def get_text(tag):
     return res + tag.get_text()
 
 
-def get_answer(soup, inp, qtext):
-    if 'id' not in inp.attrs:
-        return None
-    id = inp['id']
+def find_inputs(e):
+    inps = e.findAll('input') + e.findAll('textarea') + e.findAll('select')
+    return inps
 
-    if 'type' not in inp.attrs:
-        return None
+
+def add_solutions(soup, e, id):
+    others = soup.new_tag("div")
+    others.string = f"%{id.upper()}%"
+    e.parent.append(others)
+
+
+def parse_input(soup, inp, id, qtext):
     t = inp['type']
     if t == "hidden":
         return None
+
     value = inp['value']
     if t in ["radio", "checkbox"]:
         value = '1' if 'checked' in inp.attrs else '0'
 
     text = get_text(inp.parent).strip()
-    others = soup.new_tag("div")
-    others.string = f"%{id.upper()}%"
-    inp.parent.append(others)
+    add_solutions(soup, inp, id)
 
     return Answer(id, value, text, t, qtext)
+
+
+def parse_textarea(soup, e, id, qtext):
+    value = e.get_text()
+    t = "textarea"
+    add_solutions(soup, e, id)
+    text = get_text(e.parent).strip()
+    return Answer(id, value, text, t, qtext)
+
+
+def parse_select(soup, e, id, qtext):
+    value = "<no selection>"
+    for opt in e.findAll('option'):
+        if 'selected' in opt.attrs:
+            value = get_text(opt)
+    t = "select"
+    add_solutions(soup, e, id)
+    text = get_text(e.parent).strip()
+    return Answer(id, value, text, t, qtext)
+
+
+def get_answer(soup, inp, qtext):
+    if 'id' not in inp.attrs:
+        return None
+    id = inp['id']
+
+    if 'type' in inp.attrs:
+        return parse_input(soup, inp, id, qtext)
+
+    if inp.name == "textarea":
+        return parse_textarea(soup, inp, id, qtext)
+
+    if inp.name == "select":
+        return parse_select(soup, inp, id, qtext)
+
+    return None
 
 
 def get_answers(soup, inps, text):
@@ -133,7 +199,7 @@ def parse_okutable(soup, tables):
                 continue
 
             text = question_text+get_text(question)
-            inps = answer.findAll('input')
+            inps = find_inputs(answer)
             answers.extend(get_answers(soup, inps, text))
             questions.append(Question(text))
 
@@ -143,7 +209,7 @@ def parse_okutable(soup, tables):
 def parse_answers(soup, answs, text):
     answers = []
     for ans in answs:
-        inps = ans.findAll('input')
+        inps = find_inputs(ans)
         answers.extend(get_answers(soup, inps, text))
     return answers
 
@@ -151,7 +217,15 @@ def parse_answers(soup, answs, text):
 def parse_subquestions(soup, subques, text):
     answers = []
     for subque in subques:
-        inps = subque.findAll('input')
+        inps = find_inputs(subque)
+        answers.extend(get_answers(soup, inps, text))
+    return answers
+
+
+def parse_mathjaxloader_equations(soup,  eqs, text):
+    answers = []
+    for eq in eqs:
+        inps = find_inputs(eq)
         answers.extend(get_answers(soup, inps, text))
     return answers
 
@@ -190,7 +264,7 @@ def parse_test(content: str) -> ETest:
         return None
 
     handleLatex(form)
-
+    page = get_page(soup)
     cmid = get_cmid(form)
     name = get_name(soup)
     answers = []
@@ -214,17 +288,20 @@ def parse_test(content: str) -> ETest:
             continue
 
         qtext = que.find('div', attrs={'class': 'qtext'})
-        if qtext is None:
-            continue
+        if qtext is not None:
+            text = get_text(qtext)
+            questions.append(Question(text))
+        else:
+            text = ""  # question is somehow in the answer
 
-        text = get_text(qtext)
-        questions.append(Question(text))
-
-        answs = que.findAll(['div', 'span'], attrs={'class': 'answer'})
+        answs = que.findAll(['div', 'span', 'table'], attrs={'class': 'answer'})
         answers.extend(parse_answers(soup, answs, text))
 
         subques = que.findAll(['div', 'span'], attrs={'class': 'subquestion'})
         answers.extend(parse_subquestions(soup, subques, text))
 
+        answs = que.findAll(['div', 'span'], attrs={'class': 'filter_mathjaxloader_equation'})
+        answers.extend(parse_mathjaxloader_equations(soup, answs, text))
+
     answers = list(filter(lambda x: x is not None, answers))
-    return ETest(cmid, name, answers, questions, str(form))
+    return ETest(cmid, name, answers, questions, str(form), page)
