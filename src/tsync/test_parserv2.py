@@ -1,4 +1,5 @@
 import bs4
+import copy
 
 
 class Answer:
@@ -28,9 +29,6 @@ class ETest:
         self.answers: list[Answer] = answers
         self.questions: list[Question] = questions
         self.html: str = html
-
-    def make_html(self) -> str:
-        return "<br><br>".join([q.text for q in self.questions])
 
 
 def make_compatible(content):
@@ -99,8 +97,14 @@ def get_cmid(form):
 
 
 def get_text(tag):
-    imgs = tag.findAll('img')
+    tag = copy.deepcopy(tag)
+
+    selects = tag.findAll('select')
+    for select in selects:
+        select.decompose()
+
     res = []
+    imgs = tag.findAll('img')
     for img in imgs:
         key = None
         if img.has_attr('href'):
@@ -108,7 +112,7 @@ def get_text(tag):
         if key is not None:
             res.append(img[key])
     res = "\n".join(res)
-    return res + tag.get_text()
+    return (res + tag.get_text()).strip()
 
 
 def find_inputs(e):
@@ -131,7 +135,7 @@ def parse_input(soup, inp, id, qtext):
     if t in ["radio", "checkbox"]:
         value = '1' if 'checked' in inp.attrs else '0'
 
-    text = get_text(inp.parent).strip()
+    text = get_text(inp.parent)
     add_solutions(soup, inp, id)
 
     return Answer(id, value, text, t, qtext)
@@ -140,8 +144,8 @@ def parse_input(soup, inp, id, qtext):
 def parse_textarea(soup, e, id, qtext):
     value = e.get_text()
     t = "textarea"
+    text = get_text(e.parent.parent)
     add_solutions(soup, e, id)
-    text = get_text(e.parent).strip()
     return Answer(id, value, text, t, qtext)
 
 
@@ -151,8 +155,11 @@ def parse_select(soup, e, id, qtext):
         if 'selected' in opt.attrs:
             value = get_text(opt)
     t = "select"
+    label = e.parent.find('label')
+    if label is not None:
+        label.decompose()
+    text = get_text(e.parent.parent)
     add_solutions(soup, e, id)
-    text = get_text(e.parent).strip()
     return Answer(id, value, text, t, qtext)
 
 
@@ -293,6 +300,7 @@ def parse_test(content: str) -> ETest:
             questions.append(Question(text))
         else:
             text = ""  # question is somehow in the answer
+            # todo guess the question number
 
         answs = que.findAll(['div', 'span', 'table'], attrs={'class': 'answer'})
         answers.extend(parse_answers(soup, answs, text))

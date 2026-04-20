@@ -35,10 +35,11 @@ aiModel = AIModel()
 def get_etest_v2(cmid, user_id):
     db = get_db()
     res = db.cursor().execute(
-        "SELECT name, html FROM etest_v2 WHERE cmid=? AND user_id=?", (cmid, user_id))
+        "SELECT name, html, page FROM etest_v2 WHERE cmid=? AND user_id=?", (cmid, user_id))
     etests = res.fetchall()
     if len(etests) == 0:
         return None, None
+    etests = sorted(etests, key=lambda x: int(x[2]))
     name = etests[0][0]
     html = "<br>".join([e[1] for e in etests])
     etest = ETest(cmid, name, [], [], html)
@@ -222,7 +223,6 @@ def test_page(testid):
     test, groups = get_etest_v2(testid, user_id)
     if test is None:
         return render_template("testnotfoundtmpl.html"), 404
-    render = test.make_html()
     render = test.html
     for ans, group in zip(test.answers, groups):
         s = answer_to_html(ans, group, False)
