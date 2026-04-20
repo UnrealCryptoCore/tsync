@@ -116,7 +116,8 @@ def get_text(tag):
 
 
 def find_inputs(e):
-    inps = e.findAll('input') + e.findAll('textarea') + e.findAll('select')
+    inps = list(filter(lambda x: x['type'] != "hidden", e.findAll('input')))
+    inps.extend(e.findAll('textarea') + e.findAll('select'))
     return inps
 
 
@@ -126,17 +127,20 @@ def add_solutions(soup, e, id):
     e.parent.append(others)
 
 
+def add_eqation_id(soup, e, id):
+    others = soup.new_tag("span")
+    others.string = id
+    others['style'] = "display: none;"
+    e.parent.append(others)
+
+
 def parse_input(soup, inp, id, qtext):
     t = inp['type']
-    if t == "hidden":
-        return None
-
     value = inp['value']
     if t in ["radio", "checkbox"]:
         value = '1' if 'checked' in inp.attrs else '0'
 
     text = get_text(inp.parent)
-    add_solutions(soup, inp, id)
 
     return Answer(id, value, text, t, qtext)
 
@@ -145,7 +149,6 @@ def parse_textarea(soup, e, id, qtext):
     value = e.get_text()
     t = "textarea"
     text = get_text(e.parent.parent)
-    add_solutions(soup, e, id)
     return Answer(id, value, text, t, qtext)
 
 
@@ -159,7 +162,6 @@ def parse_select(soup, e, id, qtext):
     if label is not None:
         label.decompose()
     text = get_text(e.parent.parent)
-    add_solutions(soup, e, id)
     return Answer(id, value, text, t, qtext)
 
 
@@ -229,10 +231,13 @@ def parse_subquestions(soup, subques, text):
     return answers
 
 
-def parse_mathjaxloader_equations(soup,  eqs, text):
+def parse_mathjaxloader_equations(soup, eqs, text):
     answers = []
+    ht = hash(text)
     for eq in eqs:
         inps = find_inputs(eq)
+        for i, inp in enumerate(inps):
+            add_eqation_id(soup, inp, f"{ht}-{i}")
         answers.extend(get_answers(soup, inps, text))
     return answers
 
@@ -277,14 +282,21 @@ def parse_test(content: str) -> ETest:
     answers = []
     questions = []
     for que in form.findAll('div', attrs={'class': 'que'}):
-        que = que.find('div', attrs={'class': 'content'})
-        if que is None:
+        content = que.find('div', attrs={'class': 'content'})
+        if content is None:
             continue
-        outcome = que.find('div', attrs={'class': 'outcome'})
+        outcome = content.find('div', attrs={'class': 'outcome'})
         if outcome:
             outcome.decompose()
 
-        okutables = que.findAll('div', attrs={'class': 'okutable'})
+        no = ""
+        info = que.find('div', attrs={'class': 'info'})
+        if info is not None:
+            qno = info.find('span', attrs={'class': 'qno'})
+            if qno is not None:
+                no = qno.get_text()
+
+        okutables = content.findAll('div', attrs={'class': 'okutable'})
         oku_answers, oku_questions = parse_okutable(soup, okutables)
         answers.extend(oku_answers)
         questions.extend(oku_questions)
@@ -294,22 +306,25 @@ def parse_test(content: str) -> ETest:
         if len(oku_questions) > 0:
             continue
 
-        qtext = que.find('div', attrs={'class': 'qtext'})
+        qtext = content.find('div', attrs={'class': 'qtext'})
         if qtext is not None:
             text = get_text(qtext)
             questions.append(Question(text))
         else:
-            text = ""  # question is somehow in the answer
-            # todo guess the question number
+            text = no  # question is somehow in the answer
 
-        answs = que.findAll(['div', 'span', 'table'], attrs={'class': 'answer'})
+        answs = content.findAll(['div', 'span', 'table'], attrs={'class': 'answer'})
         answers.extend(parse_answers(soup, answs, text))
 
-        subques = que.findAll(['div', 'span'], attrs={'class': 'subquestion'})
-        answers.extend(parse_subquestions(soup, subques, text))
+        # subques = content.findAll(['div', 'span'], attrs={'class': 'subquestion'})
+        # answers.extend(parse_subquestions(soup, subques, text))
 
-        answs = que.findAll(['div', 'span'], attrs={'class': 'filter_mathjaxloader_equation'})
+        answs = content.findAll(['div', 'span'], attrs={
+                            'class': 'filter_mathjaxloader_equation'})
         answers.extend(parse_mathjaxloader_equations(soup, answs, text))
 
     answers = list(filter(lambda x: x is not None, answers))
+    for id in map(lambda x: x.id, answers):
+        e = soup.find(id=id)
+        add_solutions(soup, e, id)
     return ETest(cmid, name, answers, questions, str(form), page)
