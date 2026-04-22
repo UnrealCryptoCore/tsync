@@ -1,0 +1,38 @@
+.toggle-key-input {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.api-key-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.api-key-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.toggle-key-label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-key-label .eye-off-icon { display: none; }
+
+.api-key-visible {
+    color: var(--primary);
+}
+
+#toggle-key:not(:checked) ~ .api-key-display .api-key-visible {
+    display: none;
+}
+
+#toggle-key:checked ~ .api-key-display .api-key-dots { display: none; }
+#toggle-key:checked ~ .api-key-display .eye-icon { display: none; }
+#toggle-key:checked ~ .api-key-display .eye-off-icon { display: inline; }
