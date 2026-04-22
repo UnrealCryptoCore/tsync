@@ -2,11 +2,17 @@
 {% block title %}Resources{% endblock %}
 {% block content %}
 <h1>Resources</h1>
-<div>
-    <ul>
-        {% for link, name in res_links %}
-            <li><a href="{{ link }}">{{ name }}</a></li>
-        {% endfor %}
-    </ul>
+<div class="card">
+    {% if res_links %}
+        <ul class="history-list">
+            {% for link, name in res_links %}
+                <li class="history-item">
+                    <a href="{{ link }}" target="_blank" rel="noopener">{{ name }}</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty-state text-secondary">No resources available</p>
+    {% endif %}
 </div>
 {% endblock %}

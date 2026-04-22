@@ -32,6 +32,12 @@ bp = Blueprint("tsync", __name__)
 aiModel = AIModel()
 
 
+def page_rank(page: str | None) -> int | str:
+    if page is None:
+        return 0
+    return int(page) if page.isdecimal() else page
+
+
 def get_etest_v2(cmid, user_id):
     db = get_db()
     res = db.cursor().execute(
@@ -39,7 +45,7 @@ def get_etest_v2(cmid, user_id):
     etests = res.fetchall()
     if len(etests) == 0:
         return None, None
-    etests = sorted(etests, key=lambda x: int(x[2]))
+    etests = sorted(etests, key=lambda x: page_rank(x[2]))
     name = etests[0][0]
     html = "<br>".join([e[1] for e in etests])
     etest = ETest(cmid, name, [], [], html)

@@ -49,18 +49,14 @@ def api_key_required(view):
 @bp.get("/account")
 def account():
     if 'id' not in session:
-        return redirect("/login"), 401
+        return redirect("/login")
     id = session['id']
     username = session['username']
     passfail = request.args.get('passfail') in ['true', 'True', '1']
-    usekey = request.args.get('key') in ['true', 'True', '1']
-    key = ""
-    if usekey:
-        db = get_db()
-        res = db.execute("SELECT api_key FROM user WHERE id=?", (id,))
-        res = res.fetchone()
-        if res:
-            key = res[0]
+    db = get_db()
+    res = db.execute("SELECT api_key FROM user WHERE id=?", (id,))
+    res = res.fetchone()
+    key = res[0] if res else None
     return render_template("accounttmpl.html", passfail=passfail, username=username, id=id, key=key)
 
 

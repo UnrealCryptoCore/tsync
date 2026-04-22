@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block title %}Login{% endblock %}
 {% block content %}
-<div>
-    <div class="tsync-box login-box">
-        <h3>Login</h3>
+<div style="max-width: 360px; margin: 4rem auto;">
+    <div class="card">
+        <h2 class="card-title text-center">Sign In</h2>
         <form method="post" action="/login">
             {% if invalid %}
-            <div class="danger-text">
-                <p>Password or username is incorrect</p>
+            <div class="error-box">
+                <p>Invalid username or password</p>
             </div>
             {% endif %}
             <div class="form-group">
@@ -18,7 +18,7 @@
             <label>Password</label>
             <input type="password" name="password" required>
             </div>
-            <button class="tsync-btn-primary long-btn" type="submit">Sign In</button>
+            <button type="submit" class="btn btn-primary btn-block">Sign In</button>
         </form>
     </div>
 </div>

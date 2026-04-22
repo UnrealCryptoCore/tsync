@@ -2,30 +2,27 @@
 {% block title %}Tampermonkey{% endblock %}
 {% block content %}
 <h1>Tampermonkey</h1>
-<div>
-    You can use a tampermonkey script to upload the test directly from moodle.
-    <br>
-    To use the script do the following:
-    
-    <ol>
-        <li>Download the <a href="http://tampermonkey.net/">tampermonkey</a> extension if you haven't already. Available on <a href="https://addons.mozilla.org/en-US/firefox/addon/tampermonkey/">firefox</a> or <a href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo">Chrome</a>.</li>
-        <li>Click this <a href="/tsync.user.js">link</a> to download the script.</li>
-        <li>Open a test in moodle. If the script is active, a few buttons in the bottom left corner should have appeared.</li>
-        <li>Add your api-key (by pressing the corresponding button). You can create an api-key in your tsync account settings.</li>
-        <li>If everything worked, pressing the update button in moodle should now update the test in tsync.</li>
-    </ol>
-</div>
-<div class="tsync-warning-text">
-    <h3>
-        Warning
-    </h3>
-    <p>
-        If you are using a chromium based browser you need to enable userscripts for tamper monkey.
-        <ol>
+
+<div class="grid-2">
+    <div class="card">
+        <h3 class="card-title">Setup Instructions</h3>
+        <ol style="padding-left: 1.25rem;">
+            <li class="mb-1">Download <a href="http://tampermonkey.net/" target="_blank">Tampermonkey</a> extension (Firefox or Chrome).</li>
+            <li class="mb-1">Click <a href="/tsync.user.js">this link</a> to download the script.</li>
+            <li class="mb-1">Open a test in Moodle. If the script is active, buttons will appear in the bottom left corner.</li>
+            <li class="mb-1">Add your API key in the script settings. You can create one in your Account page.</li>
+            <li class="mb-1">Press the update button in Moodle to sync the test.</li>
+        </ol>
+    </div>
+
+    <div class="card" style="border-color: var(--warning);">
+        <h3 class="card-title">⚠️ Warning</h3>
+        <p class="text-sm">If using a Chromium-based browser, you need to enable user scripts:</p>
+        <ol style="padding-left: 1.25rem; margin-top: 0.5rem;" class="text-sm">
             <li>Go to Extension Management</li>
             <li>Find Tampermonkey and click "Details"</li>
             <li>Enable "Allow user scripts"</li>
         </ol>
-    </p>
+    </div>
 </div>
 {% endblock %}
