@@ -356,12 +356,10 @@ def api_ai_answer(aid):
 def tm_script():
     if "username" not in session:
         return redirect("/login")
-    with open(os.path.join(current_app.static_folder, 'style.css'), "r") as f:
-        return render_template("tsync.user.js",
-                               url=current_app.config['URL'],
-                               styles=f.read()), 200, {
-            'Content-Type': 'application/javascript'
-        }
+    return render_template("tsync.user.js",
+                           url=current_app.config['URL']), 200, {
+        'Content-Type': 'application/javascript'
+    }
 
 
 @bp.route("/helloworld")

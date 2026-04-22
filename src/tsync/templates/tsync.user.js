@@ -244,7 +244,13 @@ async function handleMoodle(url, apiKey) {
     }
 
 
-    GM_addStyle(`{{ styles }}`);
+    GM_xmlhttpRequest({
+        method: "GET",
+        url: "{{ url }}/static/tsync.user.css",
+        onload: function(res) {
+            GM_addStyle(res.responseText);
+        }
+    });
 
     let autoUpdate = await GM_getValue("autoUpdate", true);
     let lastUpdate = 0;
@@ -287,30 +293,28 @@ async function handleMoodle(url, apiKey) {
     box.appendChild(keyBtn);
 
     const textBox = document.createElement('div');
-    textBox.className = "text-box";
+    textBox.className = "tsync-text-box";
 
-    const updateBox = document.createElement('div');
-    updateBox.className = "update-box";
-    updateBox.innerHTML = '<span>auto upload</span>';
-    updateBox.style.display = 'flex';
-    updateBox.style.justifyContent = 'space-between';
-    updateBox.addEventListener('click', updateAutoUpdate);
+    const autoUpdateBox = document.createElement('span');
+    autoUpdateBox.innerHTML = '<span>Auto upload</span>';
+    autoUpdateBox.addEventListener('click', updateAutoUpdate);
 
     const updateBoxCheck = document.createElement('input');
     updateBoxCheck.type = 'checkbox';
     updateBoxCheck.checked = autoUpdate;
-    updateBox.appendChild(updateBoxCheck);
+    autoUpdateBox.appendChild(updateBoxCheck);
 
-    textBox.appendChild(updateBox);
+    textBox.appendChild(autoUpdateBox);
 
 
     const info = document.createElement('div');
+    info.className = "tsync-info";
     info.textContent = "";
     textBox.appendChild(info);
 
     const error = document.createElement('div');
+    error.className = "tsync-error";
     error.textContent = "";
-    error.style.color = "red";
     textBox.appendChild(error);
 
     box.appendChild(textBox);
@@ -328,6 +332,14 @@ async function handleMoodle(url, apiKey) {
     'use strict';
 
     const url = "{{ url }}";
+
+    GM_xmlhttpRequest({
+        method: "GET",
+        url: url + "/static/tsync.user.css",
+        onload: function(res) {
+            GM_addStyle(res.responseText);
+        }
+    });
 
     const apiKey = await GM_getValue("apikey", null);
 
