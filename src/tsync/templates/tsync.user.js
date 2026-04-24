@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TSync
 // @namespace    http://tampermonkey.net/
-// @version      2025-11-06
+// @version      2026-04-24
 // @description  Convenient way to upload files to tsync
 // @author       CryptoCore
 // @match        https://moodle.rwth-aachen.de/mod/quiz/*
