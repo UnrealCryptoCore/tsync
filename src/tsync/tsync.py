@@ -20,6 +20,7 @@ from .test_parserv2 import (
     ETest,
     Answer,
     Question,
+    replace_id,
 )
 from .ai_answer import (
     AIModel,
@@ -232,7 +233,8 @@ def test_page(testid):
     render = test.html
     for ans, group in zip(test.answers, groups):
         s = answer_to_html(ans, group, False)
-        render = render.replace(f"%{ans.id.upper()}%", s)
+        repid = replace_id(ans.id)
+        render = render.replace(repid, s)
     render = Markup(render)
     return render_template("testtmpl_v2.html", name=test.name, test_render=render)
 

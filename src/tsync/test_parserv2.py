@@ -3,7 +3,13 @@ import copy
 
 
 class Answer:
-    def __init__(self, id, value, text, tp, question_text=None, text_hash=None):
+    def __init__(self,
+                 id,
+                 value,
+                 text,
+                 tp,
+                 question_text=None,
+                 text_hash=None):
         self.id: str = id
         self.text = text
         if text_hash is not None:
@@ -29,6 +35,10 @@ class ETest:
         self.answers: list[Answer] = answers
         self.questions: list[Question] = questions
         self.html: str = html
+
+
+def replace_id(id):
+    return f"%{id.upper()}%"
 
 
 def make_compatible(content):
@@ -123,7 +133,7 @@ def find_inputs(e):
 
 def add_solutions(soup, e, id):
     others = soup.new_tag("div")
-    others.string = f"%{id.upper()}%"
+    others.string = replace_id(id)
     e.parent.append(others)
 
 
@@ -137,8 +147,16 @@ def add_eqation_id(soup, e, id):
 def parse_input(soup, inp, id, qtext):
     t = inp['type']
     value = inp['value']
-    if t in ["radio", "checkbox"]:
+    if t == "checkbox":
         value = '1' if 'checked' in inp.attrs else '0'
+
+    if t == "radio":
+        btns = soup.findAll("input", attrs={"name": inp['name']})
+        value = '-1'
+        for btn in btns:
+            if 'checked' in btn.attrs:
+                value = btn['value']
+                break
 
     text = get_text(inp.parent)
 
@@ -210,6 +228,35 @@ def parse_okutable(soup, tables):
             text = question_text+get_text(question)
             inps = find_inputs(answer)
             answers.extend(get_answers(soup, inps, text))
+            questions.append(Question(text))
+
+    return answers, questions
+
+
+def parse_responsivetable(soup, tables, text):
+    questions = []
+    answers = []
+
+    for table in tables:
+        thead = table.find('thead')
+        options = []
+        if thead is not None:
+            for opt in thead.findAll('th'):
+                options.append(get_text(opt))
+
+        tbody = table.find('tbody')
+
+        trs = tbody.findAll('tr')
+        for tr in trs:
+            question = tr.find('td', attrs={'class': 'optiontext'})
+            inps = find_inputs(tr)
+
+            text = get_text(question)
+            print(text)
+            answs = get_answers(soup, inps, text)
+            print(answs)
+            answers.extend(answs)
+
             questions.append(Question(text))
 
     return answers, questions
@@ -320,8 +367,14 @@ def parse_test(content: str) -> ETest:
         # answers.extend(parse_subquestions(soup, subques, text))
 
         answs = content.findAll(['div', 'span'], attrs={
-                            'class': 'filter_mathjaxloader_equation'})
+            'class': 'filter_mathjaxloader_equation'})
         answers.extend(parse_mathjaxloader_equations(soup, answs, text))
+
+        tables = content.findAll(['div', 'span', 'table'], attrs={
+            'class': 'table-responsive'})
+        rtAns, rtQs = parse_responsivetable(soup, tables, text)
+        answers.extend(rtAns)
+        questions.extend(rtQs)
 
     answers = list(filter(lambda x: x is not None, answers))
     for id in map(lambda x: x.id, answers):
